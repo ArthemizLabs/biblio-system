@@ -1,5 +1,7 @@
+banco_dados/
 target/
 !.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
 .kotlin
 build/
 out/
@@ -36,6 +38,10 @@ dist/
 
 ### VS Code ###
 .vscode/
+.env
 
 ### Mac OS ###
 .DS_Store
+
+### Docker volumes ###
+mysql_data/

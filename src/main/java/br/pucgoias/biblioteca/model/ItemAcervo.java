@@ -2,7 +2,6 @@ package br.pucgoias.biblioteca.model;
 
 /**
  * Classe abstrata base para itens do acervo bibliográfico.
- * Demonstra Abstração e Herança — pilar exigido pela disciplina POO.
  */
 public abstract class ItemAcervo {
 
