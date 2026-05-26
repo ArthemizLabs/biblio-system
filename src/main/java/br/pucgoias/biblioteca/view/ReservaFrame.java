@@ -1,0 +1,200 @@
+package br.pucgoias.biblioteca.view;
+
+import br.pucgoias.biblioteca.dao.ReservaDAO;
+import br.pucgoias.biblioteca.controller.LeitorController;
+import br.pucgoias.biblioteca.controller.LivroController;
+import br.pucgoias.biblioteca.model.*;
+import br.pucgoias.biblioteca.util.Mensagens;
+import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * Janela de registro de Reservas de livros.
+ * Verifica disponibilidade antes de registrar e lista reservas abertas.
+ */
+public class ReservaFrame extends JInternalFrame {
+
+    private final ReservaDAO dao              = new ReservaDAO();
+    private final LeitorController leitorCtrl = new LeitorController();
+    private final LivroController livroCtrl   = new LivroController();
+
+    private JComboBox<Leitor> comboLeitor;
+    private JComboBox<Livro>  comboLivro;
+
+    private JTable tabela;
+    private DefaultTableModel modeloTabela;
+
+    public ReservaFrame() {
+        inicializarComponentes();
+        configurarJanela();
+        carregarCombos();
+        listarReservas();
+    }
+
+    private void inicializarComponentes() {
+        JTabbedPane abas = new JTabbedPane();
+        abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        abas.addTab("Nova Reserva",    criarPainelReserva());
+        abas.addTab("Reservas Abertas", criarPainelLista());
+        add(abas);
+    }
+
+    private JPanel criarPainelReserva() {
+        JPanel painel = new JPanel(new GridBagLayout());
+        painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 6, 8, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        gbc.gridx = 0; gbc.gridy = 0;
+        painel.add(new JLabel("Leitor: *"), gbc);
+        comboLeitor = new JComboBox<>();
+        comboLeitor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        gbc.gridx = 1; painel.add(comboLeitor, gbc);
+
+        gbc.gridx = 0; gbc.gridy = 1;
+        painel.add(new JLabel("Livro: *"), gbc);
+        comboLivro = new JComboBox<>();
+        comboLivro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        gbc.gridx = 1; painel.add(comboLivro, gbc);
+
+        JButton btnReservar = criarBotao("Registrar Reserva", new Color(39, 174, 96));
+        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(20, 6, 6, 6);
+        painel.add(btnReservar, gbc);
+
+        btnReservar.addActionListener(e -> registrarReserva());
+
+        return painel;
+    }
+
+    private JPanel criarPainelLista() {
+        JPanel painel = new JPanel(new BorderLayout(10, 10));
+        painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        modeloTabela = new DefaultTableModel(
+                new String[]{"ID", "Leitor", "Livro", "Data Reserva", "Status"}, 0) {
+            @Override public boolean isCellEditable(int r, int c) { return false; }
+        };
+        tabela = new JTable(modeloTabela);
+        tabela.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        tabela.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tabela.setRowHeight(24);
+        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton btnCancelar = criarBotao("Cancelar Reserva", new Color(192, 57, 43));
+        JButton btnAtualizar = criarBotao("Atualizar Lista", new Color(127, 140, 141));
+        painelBotoes.add(btnCancelar);
+        painelBotoes.add(btnAtualizar);
+
+        painel.add(painelBotoes, BorderLayout.NORTH);
+        painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
+
+        btnCancelar.addActionListener(e  -> cancelarReserva());
+        btnAtualizar.addActionListener(e -> listarReservas());
+
+        return painel;
+    }
+
+    private void registrarReserva() {
+        Leitor leitor = (Leitor) comboLeitor.getSelectedItem();
+        Livro livro   = (Livro)  comboLivro.getSelectedItem();
+
+        if (leitor == null || livro == null) {
+            JOptionPane.showMessageDialog(this, "Selecione o leitor e o livro.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            if (!dao.verificarDisponibilidade(livro.getId())) {
+                JOptionPane.showMessageDialog(this,
+                        "Livro indisponível para reserva (sem exemplares ou já reservado).",
+                        "Aviso", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            Reserva reserva = new Reserva();
+            reserva.setLeitor(leitor);
+            reserva.setLivro(livro);
+            reserva.setDataReserva(LocalDate.now());
+            reserva.setStatus(Reserva.Status.ABERTA);
+            dao.inserir(reserva);
+            JOptionPane.showMessageDialog(this, "Reserva registrada com sucesso!");
+            listarReservas();
+        } catch (BancoDadosException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void cancelarReserva() {
+        int linha = tabela.getSelectedRow();
+        if (linha < 0) {
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        int id = (int) modeloTabela.getValueAt(linha, 0);
+        try {
+            Reserva reserva = dao.buscarPorId(id);
+            if (reserva == null) return;
+            reserva.setStatus(Reserva.Status.CANCELADA);
+            dao.atualizar(reserva);
+            JOptionPane.showMessageDialog(this, "Reserva cancelada.");
+            listarReservas();
+        } catch (BancoDadosException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void listarReservas() {
+        modeloTabela.setRowCount(0);
+        try {
+            List<Reserva> lista = dao.listarTodos();
+            for (Reserva r : lista) {
+                modeloTabela.addRow(new Object[]{
+                        r.getId(),
+                        r.getLeitor() != null ? r.getLeitor().getNome() : "",
+                        r.getLivro()  != null ? r.getLivro().getTitulo() : "",
+                        r.getDataReserva(),
+                        r.getStatus()
+                });
+            }
+        } catch (BancoDadosException e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void carregarCombos() {
+        try {
+            comboLeitor.removeAllItems();
+            leitorCtrl.listarTodos().forEach(comboLeitor::addItem);
+            comboLivro.removeAllItems();
+            livroCtrl.listarTodos().forEach(comboLivro::addItem);
+        } catch (BancoDadosException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private JButton criarBotao(String texto, Color cor) {
+        JButton btn = new JButton(texto);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setBackground(cor);
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return btn;
+    }
+
+    private void configurarJanela() {
+        setTitle(Mensagens.get("menu.reservas"));
+        setSize(680, 460);
+        setClosable(true); setMaximizable(true);
+        setIconifiable(true); setResizable(true);
+        setLocation(80, 80);
+    }
+}

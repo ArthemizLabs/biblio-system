@@ -14,8 +14,7 @@
   <description>Sistema de Gerenciamento de Biblioteca - PUC Goiás</description>
 
   <properties>
-    <maven.compiler.source>17</maven.compiler.source>
-    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -30,6 +29,7 @@
 
   <build>
     <plugins>
+
       <!-- Plugin para gerar JAR executável com todas as dependências -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -38,7 +38,6 @@
         <configuration>
           <archive>
             <manifest>
-              <!-- Ajuste aqui quando criar a classe Main -->
               <mainClass>br.pucgoias.biblioteca.App</mainClass>
             </manifest>
           </archive>
@@ -47,6 +46,17 @@
           </descriptorRefs>
         </configuration>
       </plugin>
+
+      <!-- Plugin para rodar a aplicação com as dependências no classpath -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>br.pucgoias.biblioteca.App</mainClass>
+        </configuration>
+      </plugin>
+
     </plugins>
 
     <!-- Inclui os arquivos .properties de i18n no classpath -->
@@ -58,6 +68,7 @@
         </includes>
       </resource>
     </resources>
+
   </build>
 
 </project>
