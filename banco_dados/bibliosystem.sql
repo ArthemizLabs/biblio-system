@@ -45,7 +45,7 @@ CREATE TABLE usuario (
     id     INT AUTO_INCREMENT PRIMARY KEY,
     login  VARCHAR(50)  NOT NULL UNIQUE,
     senha  VARCHAR(100) NOT NULL,
-    perfil ENUM('ADMIN','FUNCIONÁRIO') NOT NULL DEFAULT 'FUNCIONÁRIO'
+    perfil ENUM('ADMIN','FUNCIONARIO') NOT NULL DEFAULT 'FUNCIONARIO'
 );
 
 -- ------------------------------------------------------------
@@ -94,7 +94,7 @@ CREATE TABLE reserva (
 
 INSERT INTO usuario (login, senha, usuario.perfil) VALUES
     ('admin',       'admin123',    'ADMIN'),
-    ('funcionário', 'func123',     'FUNCIONÁRIO');
+    ('funcionario', 'func123',     'FUNCIONARIO');
 
 INSERT INTO autor (nome, nacionalidade) VALUES
     ('Machado de Assis',    'Brasileiro'),

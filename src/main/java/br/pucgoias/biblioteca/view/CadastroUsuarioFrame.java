@@ -66,7 +66,7 @@ public class CadastroUsuarioFrame extends JInternalFrame {
 
         gbc.gridx = 0; gbc.gridy = 3;
         painel.add(new JLabel("Perfil: *"), gbc);
-        comboPerfil = new JComboBox<>(new String[]{"FUNCIONÁRIO", "ADMIN"});
+        comboPerfil = new JComboBox<>(new String[]{"ADMIN", "FUNCIONÁRIO"});
         comboPerfil.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboPerfil, gbc);
 
@@ -131,7 +131,7 @@ public class CadastroUsuarioFrame extends JInternalFrame {
             Usuario usuario = new Usuario(0,
                     campoLogin.getText(),
                     new String(campoSenha.getPassword()),
-                    Usuario.Perfil.valueOf((String) comboPerfil.getSelectedItem()));
+                    perfilSelecionado());
             controller.salvar(usuario);
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
@@ -150,7 +150,7 @@ public class CadastroUsuarioFrame extends JInternalFrame {
                     Integer.parseInt(campoId.getText()),
                     campoLogin.getText(),
                     new String(campoSenha.getPassword()),
-                    Usuario.Perfil.valueOf((String) comboPerfil.getSelectedItem()));
+                    perfilSelecionado());
             controller.atualizar(usuario);
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
@@ -177,17 +177,22 @@ public class CadastroUsuarioFrame extends JInternalFrame {
     }
 
     private void pesquisar() {
-        List<Usuario> lista = controller.listarTodos();
-        modeloTabela.setRowCount(0);
-        if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
-            return;
-        }
-        String filtro = campoPesquisa.getText().trim().toLowerCase();
-        for (Usuario u : lista) {
-            if (filtro.isEmpty() || u.getLogin().toLowerCase().contains(filtro)) {
-                modeloTabela.addRow(new Object[]{u.getId(), u.getLogin(), u.getPerfil()});
+        try {
+            List<Usuario> lista = controller.listarTodos();
+            modeloTabela.setRowCount(0);
+            String filtro = campoPesquisa.getText().trim().toLowerCase();
+            for (Usuario u : lista) {
+                if (filtro.isEmpty() || u.getLogin().toLowerCase().contains(filtro)) {
+                    String display = u.getPerfil() == Usuario.Perfil.FUNCIONARIO ? "FUNCIONÁRIO" : u.getPerfil().name();
+                    modeloTabela.addRow(new Object[]{u.getId(), u.getLogin(), display});
+                }
             }
+            if (modeloTabela.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao pesquisar: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -209,11 +214,17 @@ public class CadastroUsuarioFrame extends JInternalFrame {
         campoLogin.requestFocus();
     }
 
+    private Usuario.Perfil perfilSelecionado() {
+        return "FUNCIONÁRIO".equals(comboPerfil.getSelectedItem())
+                ? Usuario.Perfil.FUNCIONARIO
+                : Usuario.Perfil.ADMIN;
+    }
+
     private JButton criarBotao(String texto, Color cor) {
         JButton btn = new JButton(texto);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btn.setBackground(cor);
-        btn.setForeground(Color.WHITE);
+        btn.setForeground(Color.BLACK);
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;

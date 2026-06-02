@@ -43,7 +43,7 @@ public class ListagemLivrosFrame extends JFrame {
         JButton btnAtualizar = new JButton("Atualizar");
         btnAtualizar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnAtualizar.setBackground(new Color(41, 128, 185));
-        btnAtualizar.setForeground(Color.WHITE);
+        btnAtualizar.setForeground(Color.BLACK);
         btnAtualizar.setFocusPainted(false);
         painelTopo.add(btnAtualizar);
 

@@ -61,7 +61,7 @@ public class ConfiguracaoIdiomaDialog extends JDialog {
         JButton btnCancelar = new JButton(Mensagens.get("btn.cancelar"));
         btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnCancelar.setBackground(new Color(127, 140, 141));
-        btnCancelar.setForeground(Color.WHITE);
+        btnCancelar.setForeground(Color.BLACK);
         btnCancelar.setFocusPainted(false);
 
         painelBotoes.add(btnConfirmar);
