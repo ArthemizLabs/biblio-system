@@ -305,3 +305,5 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 Projeto acadêmico desenvolvido para fins de avaliação.  
 © 2026 [Arthur Mamedes Borges](https://github.com/A4thu4) — [ArthemizLabs](https://github.com/ArthemizLabs)
+
+[MIT](LICENSE)
