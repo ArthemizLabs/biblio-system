@@ -1,4 +1,4 @@
-# 📚 BiblioSystem — Sistema de Gerenciamento de Biblioteca
+# BiblioSystem — Sistema de Gerenciamento de Biblioteca
 
 > **Disciplina:** CMP1611 – Programação Orientada a Objetos com Banco de Dados  
 > **Instituição:** Pontifícia Universidade Católica de Goiás (PUC Goiás)  
@@ -7,7 +7,7 @@
 
 ---
 
-## 📋 Sobre o Projeto
+## Sobre o Projeto
 
 O **BiblioSystem** é um sistema desktop de gerenciamento de biblioteca desenvolvido em Java com interface gráfica Swing. Implementa arquitetura em 4 camadas (Model · DAO · Controller · View), os 4 pilares de POO, e acesso a banco de dados MySQL exclusivamente via JDBC.
 
@@ -15,7 +15,7 @@ O **BiblioSystem** é um sistema desktop de gerenciamento de biblioteca desenvol
 
 ---
 
-## 🛠️ Pré-requisitos
+## Pré-requisitos
 
 Antes de importar e executar o projeto, certifique-se de ter instalado:
 
@@ -27,14 +27,17 @@ Antes de importar e executar o projeto, certifique-se de ter instalado:
 | Maven (opcional — Eclipse já inclui) | 3.8+ | [maven.apache.org](https://maven.apache.org/download.cgi) |
 
 > **Dica:** O Eclipse já vem com o Maven embutido (M2E). Não é necessário instalar o Maven separadamente para importar o projeto.
-
+>
+> **Dica Docker:** Se preferir não instalar o MySQL localmente, use o Docker — um único comando sobe o banco já configurado.
 ---
 
-## 🗄️ Configuração do Banco de Dados
+## Configuração do Banco de Dados
+
+### Opção A - MySQL local (HeidiSQL / Workbench)
 
 **Execute esse passo ANTES de importar o projeto.**
 
-### Passo 1 — Criar o banco via script SQL
+#### Passo 1 — Criar o banco via script SQL
 
 1. Abra o **HeidiSQL**, **MySQL Workbench** ou outro cliente MySQL.
 2. Conecte-se ao servidor MySQL com usuário `root` (ou outro com privilégios).
@@ -45,31 +48,67 @@ O script cria automaticamente:
 - Banco de dados: **`bibliosystem`**
 - Usuário padrão do sistema: `admin` / senha: `admin123`
 
-### Passo 2 — Configurar a conexão no código
+#### Passo 2 — Configurar a conexão no código
 
 Abra o arquivo:
+
 ```
 src/main/java/br/pucgoias/biblioteca/util/ConexaoBD.java
 ```
 
 Verifique (e ajuste se necessário) as constantes de conexão:
+
 ```java
 private static final String URL    = "jdbc:mysql://localhost:3306/bibliosystem?useSSL=false&serverTimezone=America/Sao_Paulo";
 private static final String USUARIO = "root";      // ← altere se necessário
 private static final String SENHA   = "root";      // ← altere se necessário
 ```
 
+### Opção B — Docker Compose (recomendado: zero configuração)
+
+> **Pré-requisito:** Docker Desktop instalado e em execução.
+
+O projeto inclui um `docker-compose.yml` na raiz que sobe o MySQL 8 e executa o script SQL automaticamente.
+
+```bash 
+# 1. Na raiz do projeto (onde está o docker-compose.yml), execute:
+docker compose up -d
+
+# 2. Aguarde ~15 segundos para o MySQL inicializar completamente.
+#    Verifique se o container está rodando:
+docker ps
+# Deve aparecer: bibliosystem-db   Up X seconds   0.0.0.0:3306->3306/tcp
+```
+
+O Docker irá:
+
+- Baixar a imagem `mysql:8.0` automaticamente (se ainda não tiver)
+- Criar o banco `bibliosystem` com usuário `root` / senha `root`
+- Executar o script `banco_dados/bibliosystem.sql` com todos os dados de teste
+
+> **Nenhuma configuração adicional necessária.** A conexão em `ConexaoBD.java` já aponta para `localhost:3306` com as credenciais corretas.
+
+Para parar o container quando não estiver usando:
+
+```bash
+docker compose down
+```
+
+Para parar e apagar os dados (reset completo):
+
+```bash
+docker compose down -v
+```
+
 ---
 
-## 🚀 Como Importar no Eclipse
+## Como Importar na IDE
 
 O projeto suporta **duas formas** de importação. Escolha a que preferir:
 
 ---
 
-### ✅ Opção A — Importar pelo arquivo ZIP
-
-Esta é a forma padrão de entrega da disciplina.
+### Opção A — Importar pelo arquivo ZIP
 
 1. **Descompacte** o arquivo `CMP1611-MATRICULA-NOME.zip` em uma pasta de sua escolha.  
    Dentro do zip há a pasta `OPROJETO/` contendo o projeto Maven.
@@ -93,9 +132,7 @@ Esta é a forma padrão de entrega da disciplina.
 
 ---
 
-### ✅ Opção B — Clonar pelo Git
-
-Caso o projeto esteja hospedado no GitHub.
+### Opção B — Clonar pelo Git
 
 **Pré-requisito:** Git instalado ([git-scm.com](https://git-scm.com/downloads))
 
@@ -110,29 +147,30 @@ Caso o projeto esteja hospedado no GitHub.
    **`Projects from Git`**  
    Clique em **`Next >`**.
 
-4. Selecione **`Clone URI`** e clique em **`Next >`**.
+4. Selecione **`Clone URL`** e clique em **`Next >`**.
 
-5. No campo **`URI`**, cole a URL do repositório:
-   ```
+5. No campo **`URL`**, cole a URL do repositório:
+
+    ```
    https://github.com/ArthemizLabs/BiblioSystem.git
    ```
 
-6. Clique em **`Next >`** nas próximas telas (branch `main`, diretório local padrão).
+7. Clique em **`Next >`** nas próximas telas (branch `main`).
 
-7. Na tela **`Import Projects`**, selecione:  
+8. Na tela **`Import Projects`**, selecione:  
    **`Import existing Eclipse projects`** → **`Next >`** → **`Finish`**.
 
-8. Se o projeto não for reconhecido automaticamente, use a **Opção A** após o clone:  
+9. Se o projeto não for reconhecido automaticamente, use a **Opção A** após o clone:  
    **`File`** → **`Import`** → **`Maven`** → **`Existing Maven Projects`** → aponte para a pasta clonada.
 
 #### Via terminal (alternativa rápida):
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/ArthemizLabs/BiblioSystem.git
+git clone https://github.com/ArthemizLabs/biblio-system.git
 
 # 2. Acesse a pasta
-cd BiblioSystem
+cd biblio-system
 
 # 3. Compile e baixe as dependências via Maven
 mvn clean install -DskipTests
@@ -142,7 +180,7 @@ mvn clean install -DskipTests
 
 ---
 
-## ▶️ Executando o Sistema
+## Executando o Sistema
 
 Após importar com sucesso no Eclipse:
 
@@ -160,17 +198,27 @@ Após importar com sucesso no Eclipse:
    - **Usuário:** `admin`
    - **Senha:** `admin123`
 
+### Via terminal (alternativa rápida):
+
+```bash
+# 1. Acesse a pasta
+cd biblio-system
+
+# 2. Compile e baixe as dependências via Maven
+mvn compile
+
+# 3. Execute o projeto
+mvn exec:java
+```
+
 ---
 
-## 📁 Estrutura de Pastas do ZIP de Entrega
-
-O arquivo compactado entregue ao professor segue a estrutura exigida pelas normas da disciplina:
+## Estrutura do Projeto
 
 ```
-CMP1611-2024100280224-ArthurMamedesBorges.zip
-└──biblio-system
+├── biblio-system
 │   ├── banco_dados/
-        └── biblioteca.sql           ← Script MySQL completo com dados de teste
+│       └── biblioteca.sql           ← Script MySQL completo com dados de teste
 │   ├── src/
 │   │   └── main/
 │   │       ├── java/br/pucgoias/biblioteca/
@@ -189,7 +237,7 @@ CMP1611-2024100280224-ArthurMamedesBorges.zip
 
 ---
 
-## 🏗️ Arquitetura do Projeto
+## Arquitetura do Projeto
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -218,7 +266,7 @@ CMP1611-2024100280224-ArthurMamedesBorges.zip
 
 ---
 
-## 🌐 Internacionalização (i18n)
+## Internacionalização (i18n)
 
 O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o idioma:
 
@@ -228,7 +276,7 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 ---
 
-## 🗝️ Credenciais Padrão (dados de teste)
+## Credenciais Padrão (dados de teste)
 
 | Usuário | Senha | Perfil |
 |---|---|---|
@@ -239,7 +287,7 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 ---
 
-## ⚠️ Solução de Problemas Comuns
+## Solução de Problemas Comuns
 
 | Problema | Solução |
 |---|---|
@@ -248,6 +296,8 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 | `Unknown database 'bibliosystem'` | Execute o script `biblioteca.sql` antes de rodar o sistema. |
 | Erros vermelhos após importação | Botão direito no projeto → `Maven` → `Update Project` → marque `Force Update` → `OK`. |
 | Interface em branco / não abre | Confirme que está executando `App.java` como **Java Application**, não como Applet. |
+| Container Docker não sobe (`port already in use`) | Outro processo usa a porta 3306 (provavelmente MySQL local). Pare o MySQL local ou mude a porta no `docker-compose.yml`: `"3307:3306"` e atualize a URL em `ConexaoBD.java`. |
+| `bibliosystem-db` sobe mas banco não existe | O script SQL ainda está sendo executado. Aguarde 20–30 segundos e tente novamente. |
 
 ---
 
