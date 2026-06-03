@@ -304,4 +304,4 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 ## 📄 Licença
 
 Projeto acadêmico desenvolvido para fins de avaliação.  
-© 2026 Arthur Mamedes Borges — [ArthemizLabs](https://github.com/ArthemizLabs)
+© 2026 [Arthur Mamedes Borges](https://github.com/A4thu4) — [ArthemizLabs](https://github.com/ArthemizLabs)
