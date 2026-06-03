@@ -2,7 +2,7 @@
 
 > **Disciplina:** CMP1611 – Programação Orientada a Objetos com Banco de Dados  
 > **Instituição:** Pontifícia Universidade Católica de Goiás (PUC Goiás)  
-> **Autor:** Arthur Mamedes Borges — Matrícula: 2024100280224  
+> **Autor:** Arthur Mamedes Borges 
 > **Tecnologias:** Java SE 17 · Swing · MySQL 8 · JDBC · Maven
 
 ---
@@ -38,7 +38,7 @@ Antes de importar e executar o projeto, certifique-se de ter instalado:
 
 1. Abra o **HeidiSQL**, **MySQL Workbench** ou outro cliente MySQL.
 2. Conecte-se ao servidor MySQL com usuário `root` (ou outro com privilégios).
-3. Abra o arquivo `BANCO_DADOS/biblioteca.sql` (incluso no `.zip` de entrega).
+3. Abra o arquivo `banco_dados/biblioteca.sql`.
 4. Execute o script completo. Ele cria o banco, as tabelas e insere dados de teste.
 
 O script cria automaticamente:
@@ -67,7 +67,7 @@ O projeto suporta **duas formas** de importação. Escolha a que preferir:
 
 ---
 
-### ✅ Opção A — Importar pelo arquivo ZIP *(recomendado para entrega)*
+### ✅ Opção A — Importar pelo arquivo ZIP
 
 Esta é a forma padrão de entrega da disciplina.
 
@@ -93,7 +93,7 @@ Esta é a forma padrão de entrega da disciplina.
 
 ---
 
-### ✅ Opção B — Clonar pelo Git *(recomendado para portfólio)*
+### ✅ Opção B — Clonar pelo Git
 
 Caso o projeto esteja hospedado no GitHub.
 
@@ -168,22 +168,22 @@ O arquivo compactado entregue ao professor segue a estrutura exigida pelas norma
 
 ```
 CMP1611-2024100280224-ArthurMamedesBorges.zip
-├── OPROJETO/                        ← Código-fonte completo (projeto Maven)
-│   ├── pom.xml                      ← Dependências Maven (MySQL Connector/J)
+└── banco_dados/
+    └── biblioteca.sql               ← Script MySQL completo com dados de teste
 │   ├── src/
 │   │   └── main/
-│   │       ├── java/
-│   │       │   └── br/pucgoias/biblioteca/
-│   │       │       ├── model/       ← Entidades (Livro, Autor, Leitor...)
-│   │       │       ├── dao/         ← Acesso a dados via JDBC
+│   │       ├── java/br/pucgoias/biblioteca/
 │   │       │       ├── controller/  ← Regras de negócio
-│   │       │       ├── view/        ← Janelas Swing (JFrame, JInternalFrame)
+│   │       │       ├── dao/         ← Acesso a dados via JDBC
+│   │       │       ├── model/       ← Entidades (Livro, Autor, Leitor...)
 │   │       │       └── util/        ← ConexaoBD, Mensagens (i18n), Validador
+│   │       │       ├── view/        ← Janelas Swing (JFrame, JInternalFrame)
+│   │       │       ├── App.java     ← Inicializador do sistema 
 │   │       └── resources/
-│   │           ├── messages_pt.properties   ← Textos em Português
 │   │           └── messages_en.properties   ← Textos em Inglês
-└── BANCO_DADOS/
-    └── biblioteca.sql               ← Script MySQL completo com dados de teste
+│   │           ├── messages_pt.properties   ← Textos em Português
+│   ├── docker-compose.yml           ← Script Docker para subir o banco 
+│   ├── pom.xml                      ← Dependências Maven (MySQL Connector/J)
 ```
 
 ---
@@ -193,16 +193,16 @@ CMP1611-2024100280224-ArthurMamedesBorges.zip
 ```
 ┌─────────────────────────────────────────────────────┐
 │  VIEW  (Swing: JFrame, JInternalFrame, JDialog)     │
-│  Apenas exibe dados e captura eventos do usuário     │
+│  Apenas exibe dados e captura eventos do usuário    │
 ├─────────────────────────────────────────────────────┤
-│  CONTROLLER  (Regras de negócio e validações)        │
-│  LivroController, LeitorController, etc.             │
+│  CONTROLLER  (Regras de negócio e validações)       │
+│  LivroController, LeitorController, etc.            │
 ├─────────────────────────────────────────────────────┤
-│  DAO  (Data Access Object — SQL fica aqui)           │
-│  Implementa interfaces: ILivroDAO, ILeitorDAO...     │
+│  DAO  (Data Access Object — SQL fica aqui)          │
+│  Implementa interfaces: ILivroDAO, ILeitorDAO...    │
 ├─────────────────────────────────────────────────────┤
-│  MODEL  (Entidades POO)                              │
-│  ItemAcervo (abstrata) → Livro, Leitor, Usuario...   │
+│  MODEL  (Entidades POO)                             │
+│  ItemAcervo (abstrata) → Livro, Leitor, Usuario...  │
 └─────────────────────────────────────────────────────┘
              ↓ JDBC apenas
         [ MySQL 8 — bibliosystem ]
@@ -252,5 +252,5 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 ## 📄 Licença
 
-Projeto acadêmico desenvolvido para fins de avaliação na PUC Goiás.  
+Projeto acadêmico desenvolvido para fins de avaliação.  
 © 2026 Arthur Mamedes Borges — [ArthemizLabs](https://github.com/ArthemizLabs)
