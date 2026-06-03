@@ -168,8 +168,9 @@ O arquivo compactado entregue ao professor segue a estrutura exigida pelas norma
 
 ```
 CMP1611-2024100280224-ArthurMamedesBorges.zip
-└── banco_dados/
-    └── biblioteca.sql               ← Script MySQL completo com dados de teste
+└──biblio-system
+│   ├── banco_dados/
+        └── biblioteca.sql           ← Script MySQL completo com dados de teste
 │   ├── src/
 │   │   └── main/
 │   │       ├── java/br/pucgoias/biblioteca/
