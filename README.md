@@ -2,7 +2,7 @@
 
 > **Disciplina:** CMP1611 – Programação Orientada a Objetos com Banco de Dados  
 > **Instituição:** Pontifícia Universidade Católica de Goiás (PUC Goiás)  
-> **Autor:** Arthur Mamedes Borges 
+> **Autor:** Arthur Mamedes Borges
 > **Tecnologias:** Java SE 17 · Swing · MySQL 8 · JDBC · Maven
 
 ---
@@ -19,12 +19,12 @@ O **BiblioSystem** é um sistema desktop de gerenciamento de biblioteca desenvol
 
 Antes de importar e executar o projeto, certifique-se de ter instalado:
 
-| Ferramenta | Versão mínima | Download |
-|---|---|---|
-| JDK (Java Development Kit) | 17 | [adoptium.net](https://adoptium.net) |
-| Eclipse IDE for Java Developers | 2022-09+ | [eclipse.org/downloads](https://www.eclipse.org/downloads/) |
-| MySQL Server | 8.0+ | [dev.mysql.com/downloads](https://dev.mysql.com/downloads/mysql/) |
-| Maven (opcional — Eclipse já inclui) | 3.8+ | [maven.apache.org](https://maven.apache.org/download.cgi) |
+| Ferramenta                           | Versão mínima | Download                                                          |
+|--------------------------------------|---------------|-------------------------------------------------------------------|
+| JDK (Java Development Kit)           | 17            | [adoptium.net](https://adoptium.net)                              |
+| Eclipse IDE for Java Developers      | 2022-09+      | [eclipse.org/downloads](https://www.eclipse.org/downloads/)       |
+| MySQL Server                         | 8.0+          | [dev.mysql.com/downloads](https://dev.mysql.com/downloads/mysql/) |
+| Maven (opcional — Eclipse já inclui) | 3.8+          | [maven.apache.org](https://maven.apache.org/download.cgi)         |
 
 > **Dica:** O Eclipse já vem com o Maven embutido (M2E). Não é necessário instalar o Maven separadamente para importar o projeto.
 >
@@ -41,7 +41,7 @@ Antes de importar e executar o projeto, certifique-se de ter instalado:
 
 1. Abra o **HeidiSQL**, **MySQL Workbench** ou outro cliente MySQL.
 2. Conecte-se ao servidor MySQL com usuário `root` (ou outro com privilégios).
-3. Abra o arquivo `banco_dados/biblioteca.sql`.
+3. Abra o arquivo `banco_dados/bibliosystem.sql`.
 4. Execute o script completo. Ele cria o banco, as tabelas e insere dados de teste.
 
 O script cria automaticamente:
@@ -104,64 +104,61 @@ docker compose down -v
 
 ## Como Importar na IDE
 
-O projeto suporta **duas formas** de importação. Escolha a que preferir:
+> O projeto foi desenvolvido no **IntelliJ IDEA**, mas é um **projeto Maven padrão** e abre sem ajustes em qualquer IDE (Eclipse, IntelliJ ou VS Code). As instruções abaixo priorizam o Eclipse.
+
+Há **duas formas** de importar. Escolha a que preferir:
 
 ---
 
-### Opção A — Importar pelo arquivo ZIP
+### Opção A — Importar pelo arquivo ZIP (formato da entrega)
 
 1. **Descompacte** o arquivo `CMP1611-MATRICULA-NOME.zip` em uma pasta de sua escolha.  
-   Dentro do zip há a pasta `OPROJETO/` contendo o projeto Maven.
+   Dentro dele há a pasta `OPROJETO/`, que contém o projeto Maven (com o arquivo `pom.xml` na raiz).
 
 2. Abra o **Eclipse**.
 
-3. No menu superior, clique em:  
-   **`File`** → **`Import...`**
+3. No menu superior, clique em **`File`** → **`Import...`**.
 
-4. Na janela de importação, expanda a categoria **`Maven`** e selecione:  
-   **`Existing Maven Projects`**  
-   Clique em **`Next >`**.
+4. Expanda a categoria **`Maven`**, selecione **`Existing Maven Projects`** e clique em **`Next >`**.
 
-5. No campo **`Root Directory`**, clique em **`Browse...`** e navegue até a pasta `OPROJETO/` (onde está o arquivo `pom.xml`).
+5. No campo **`Root Directory`**, clique em **`Browse...`** e aponte para a pasta **`OPROJETO/`** (onde está o `pom.xml`).
 
-6. O Eclipse irá detectar automaticamente o projeto. Marque a caixa de seleção que aparece e clique em **`Finish`**.
+6. O Eclipse detecta o projeto e marca o `pom.xml` na lista. Clique em **`Finish`**.
 
-7. Aguarde o Eclipse baixar as dependências Maven (requer conexão com internet na primeira vez). O progresso aparece na barra inferior direita.
+7. Na primeira importação, o Eclipse baixa as dependências Maven (requer internet). Acompanhe o progresso na barra inferior direita.
 
-8. Quando concluído, o projeto aparecerá no **Package Explorer** sem erros.
+8. Concluído, o projeto aparece no **Package Explorer** sem erros.
 
 ---
 
 ### Opção B — Clonar pelo Git
 
-**Pré-requisito:** Git instalado ([git-scm.com](https://git-scm.com/downloads))
+**Pré-requisito:** Git instalado ([git-scm.com](https://git-scm.com/downloads)).
 
-#### Via Eclipse (interface gráfica):
+#### Via Eclipse (detecção automática de Maven):
 
-1. Abra o Eclipse.
+1. No menu superior, clique em **`File`** → **`Import...`**.
 
-2. No menu superior, clique em:  
-   **`File`** → **`Import...`**
+2. Expanda a categoria **`Git`**, selecione **`Projects from Git (with smart import)`** e clique em **`Next >`**.
 
-3. Expanda a categoria **`Git`** e selecione:  
-   **`Projects from Git`**  
-   Clique em **`Next >`**.
+   > A variante **com *smart import*** reconhece o `pom.xml` e importa como projeto Maven automaticamente. Em versões muito antigas do Eclipse pode aparecer apenas `Projects from Git` — nesse caso, finalize o clone e importe pela **Opção A**.
 
-4. Selecione **`Clone URL`** e clique em **`Next >`**.
+3. Selecione **`Clone URI`** e clique em **`Next >`**.
 
-5. No campo **`URL`**, cole a URL do repositório:
+4. No campo **`URI`**, cole a URL do repositório:
 
-    ```
-   https://github.com/ArthemizLabs/BiblioSystem.git
+   ```
+   https://github.com/ArthemizLabs/biblio-system.git
    ```
 
-7. Clique em **`Next >`** nas próximas telas (branch `main`).
+5. **`Next >`** → selecione a branch **`main`** → **`Next >`** → escolha a pasta local de destino → **`Next >`**.
 
-8. Na tela **`Import Projects`**, selecione:  
-   **`Import existing Eclipse projects`** → **`Next >`** → **`Finish`**.
+6. O *smart import* detecta o projeto Maven. Clique em **`Finish`**.
 
-9. Se o projeto não for reconhecido automaticamente, use a **Opção A** após o clone:  
-   **`File`** → **`Import`** → **`Maven`** → **`Existing Maven Projects`** → aponte para a pasta clonada.
+7. Se, por usar uma versão antiga do Eclipse, o projeto **não** for reconhecido como Maven, importe-o pela **Opção A**:  
+   **`File`** → **`Import`** → **`Maven`** → **`Existing Maven Projects`**, apontando para a pasta clonada.
+
+> **Não use** `Import existing Eclipse projects` para este repositório. Os arquivos de configuração do Eclipse (`.project`, `.classpath`, `.settings`) **não** são versionados (estão no `.gitignore`); a importação correta é sempre como **projeto Maven**.
 
 #### Via terminal (alternativa rápida):
 
@@ -175,40 +172,43 @@ cd biblio-system
 # 3. Compile e baixe as dependências via Maven
 mvn clean install -DskipTests
 
-# 4. Abra o Eclipse e importe como Maven Project (File → Import → Maven → Existing Maven Projects)
+# 4. No Eclipse: File → Import → Maven → Existing Maven Projects (apontando para a pasta clonada)
 ```
 
 ---
 
 ## Executando o Sistema
 
-Após importar com sucesso no Eclipse:
+> **Antes de executar, o banco precisa estar criado e em execução.** Siga a seção [Configuração do Banco de Dados](#configuração-do-banco-de-dados) (MySQL local **ou** Docker). Sem o banco no ar, o login falha com erro de conexão.
+
+### Pelo Eclipse
 
 1. Confirme que **não há erros** no projeto (ícones vermelhos no Package Explorer).  
-   Se houver erros de build, clique com botão direito no projeto → **`Maven`** → **`Update Project...`** → **`OK`**.
+   Havendo erros de build, clique com o botão direito no projeto → **`Maven`** → **`Update Project...`** → marque **`Force Update of Snapshots/Releases`** → **`OK`**.
 
-2. Navegue até a classe principal:
+2. Abra a classe principal:
    ```
    src/main/java/br/pucgoias/biblioteca/App.java
    ```
 
 3. Clique com o botão direito sobre `App.java` → **`Run As`** → **`Java Application`**.
 
-4. A tela de login do BiblioSystem abrirá. Use as credenciais padrão:
+4. A tela de login abrirá. Use as credenciais padrão:
    - **Usuário:** `admin`
    - **Senha:** `admin123`
 
-### Via terminal (alternativa rápida):
+### Pelo terminal (Maven)
+
+Execute na **raiz do projeto** (onde está o `pom.xml`):
 
 ```bash
-# 1. Acesse a pasta
-cd biblio-system
-
-# 2. Compile e baixe as dependências via Maven
+# Opção 1 — compilar e executar diretamente
 mvn compile
-
-# 3. Execute o projeto
 mvn exec:java
+
+# Opção 2 — gerar um JAR executável com as dependências e rodar sem IDE
+mvn clean package
+java -jar target/bibliosystem-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 
 ---
@@ -216,23 +216,23 @@ mvn exec:java
 ## Estrutura do Projeto
 
 ```
-├── biblio-system
-│   ├── banco_dados/
-│       └── biblioteca.sql           ← Script MySQL completo com dados de teste
-│   ├── src/
-│   │   └── main/
-│   │       ├── java/br/pucgoias/biblioteca/
-│   │       │       ├── controller/  ← Regras de negócio
-│   │       │       ├── dao/         ← Acesso a dados via JDBC
-│   │       │       ├── model/       ← Entidades (Livro, Autor, Leitor...)
-│   │       │       └── util/        ← ConexaoBD, Mensagens (i18n), Validador
-│   │       │       ├── view/        ← Janelas Swing (JFrame, JInternalFrame)
-│   │       │       ├── App.java     ← Inicializador do sistema 
-│   │       └── resources/
-│   │           └── messages_en.properties   ← Textos em Inglês
-│   │           ├── messages_pt.properties   ← Textos em Português
-│   ├── docker-compose.yml           ← Script Docker para subir o banco 
-│   ├── pom.xml                      ← Dependências Maven (MySQL Connector/J)
+biblio-system/
+├── banco_dados/
+│   └── bibliosystem.sql              ← Script MySQL completo com dados de teste
+├── src/
+│   └── main/
+│       ├── java/br/pucgoias/biblioteca/
+│       │   ├── controller/           ← Regras de negócio e validações
+│       │   ├── dao/                  ← Acesso a dados via JDBC (+ dao/interfaces)
+│       │   ├── model/                ← Entidades (ItemAcervo, Livro, Autor, Leitor...)
+│       │   ├── util/                 ← ConexaoBD, Mensagens (i18n), exceptions/
+│       │   └── view/                 ← Janelas Swing (JFrame, JInternalFrame)
+│       │   ├── App.java              ← Classe principal (inicializa o sistema)
+│       └── resources/
+│           └── messages_en.properties  ← Textos em Inglês
+│           ├── messages_pt.properties  ← Textos em Português
+├── docker-compose.yml                ← Sobe o banco MySQL via Docker
+└── pom.xml                           ← Dependências Maven (MySQL Connector/J)
 ```
 
 ---
@@ -266,6 +266,28 @@ mvn exec:java
 
 ---
 
+## Indicação por Classe
+
+> Esta seção atende ao **Trabalho da disciplina de Programação Orientada a Objetos (POO)**, indicando em quais classes cada conceito exigido é aplicado.
+
+O BiblioSystem demonstra os **seis conceitos** cobrados na disciplina. O quadro a seguir resume **em quais classes cada conceito é aplicado**:
+
+| Conceito                   | Principais classes / arquivos                                                                                                                         | Como é aplicado                                                                                                                                                                             |
+|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Abstração**              | `ItemAcervo` (abstract); `IGenericoDAO<T, ID>` e demais interfaces `I…DAO`                                                                            | Classe abstrata que não pode ser instanciada e define métodos abstratos; as interfaces expõem o contrato sem revelar a implementação.                                                       |
+| **Encapsulamento**         | `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `Emprestimo`, `Reserva`, `ItemAcervo`                                                  | Atributos `private` acessados somente por *getters/setters*; enums internos (`Perfil`, `Status`) protegem os estados válidos.                                                               |
+| **Herança**                | `Livro extends ItemAcervo`; `BancoDadosException`/`ValidacaoException extends RuntimeException`; telas `extends JFrame`/`JInternalFrame`              | `Livro` reaproveita atributos e comportamento de `ItemAcervo`; exceções e telas herdam de classes da plataforma Java/Swing.                                                                 |
+| **Polimorfismo**           | `toString()` em `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `ItemAcervo`; `getIdentificador()`/`getDescricaoCompleta()` em `Livro` | Sobrescrita (`@Override`): o Swing chama `toString()` em tempo de execução para exibir objetos em `JComboBox`/`JTable`; `Livro` reimplementa os métodos abstratos herdados de `ItemAcervo`. |
+| **Interface**              | `IGenericoDAO<T, ID>`, `ILivroDAO`, `IAutorDAO`, `IEditoraDAO`, `ICategoriaDAO`, `ILeitorDAO`, `IUsuarioDAO`, `IEmprestimoDAO`, `IReservaDAO`         | Interface genérica define o CRUD; cada interface especializa o contrato e é concretizada por um DAO (`AutorDAO implements IAutorDAO`, etc.).                                                |
+| **Tratamento de Exceções** | `BancoDadosException`, `ValidacaoException` (uso em DAO, Controller e View)                                                                           | Exceções customizadas: os DAOs capturam `SQLException` e relançam `BancoDadosException`; os Controllers lançam `ValidacaoException`; as Views tratam ambas com `try/catch`.                 |
+
+**Destaque dos conceitos:**
+- **Herança** → `Livro` herda de `ItemAcervo`.
+- **Polimorfismo** → sobrescrita de `toString()` (chamado pelo Swing) e dos métodos abstratos de `ItemAcervo`.
+- **Interface** → família de interfaces `I…DAO` (a partir de `IGenericoDAO`) implementada pelos DAOs.
+
+---
+
 ## Internacionalização (i18n)
 
 O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o idioma:
@@ -278,26 +300,26 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 ## Credenciais Padrão (dados de teste)
 
-| Usuário | Senha | Perfil |
-|---|---|---|
-| `admin` | `admin123` | Administrador |
-| `funcionario` | `func123` | Funcionário |
+| Usuário       | Senha      | Perfil        |
+|---------------|------------|---------------|
+| `admin`       | `admin123` | Administrador |
+| `funcionario` | `func123`  | Funcionário   |
 
-> Estes dados são inseridos automaticamente pelo script `biblioteca.sql`.
+> Estes dados são inseridos automaticamente pelo script `bibliosystem.sql`.
 
 ---
 
 ## Solução de Problemas Comuns
 
-| Problema | Solução |
-|---|---|
-| `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | Execute `Maven → Update Project` para baixar o connector. |
-| `Access denied for user 'root'@'localhost'` | Verifique usuário/senha em `ConexaoBD.java`. |
-| `Unknown database 'bibliosystem'` | Execute o script `biblioteca.sql` antes de rodar o sistema. |
-| Erros vermelhos após importação | Botão direito no projeto → `Maven` → `Update Project` → marque `Force Update` → `OK`. |
-| Interface em branco / não abre | Confirme que está executando `App.java` como **Java Application**, não como Applet. |
-| Container Docker não sobe (`port already in use`) | Outro processo usa a porta 3306 (provavelmente MySQL local). Pare o MySQL local ou mude a porta no `docker-compose.yml`: `"3307:3306"` e atualize a URL em `ConexaoBD.java`. |
-| `bibliosystem-db` sobe mas banco não existe | O script SQL ainda está sendo executado. Aguarde 20–30 segundos e tente novamente. |
+| Problema                                           | Solução                                                                                                                                                                      |
+|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | Execute `Maven → Update Project` para baixar o connector.                                                                                                                    |
+| `Access denied for user 'root'@'localhost'`        | Verifique usuário/senha em `ConexaoBD.java`.                                                                                                                                 |
+| `Unknown database 'bibliosystem'`                  | Execute o script `bibliosystem.sql` antes de rodar o sistema.                                                                                                                |
+| Erros vermelhos após importação                    | Botão direito no projeto → `Maven` → `Update Project` → marque `Force Update` → `OK`.                                                                                        |
+| Interface em branco / não abre                     | Confirme que está executando `App.java` como **Java Application**, não como Applet.                                                                                          |
+| Container Docker não sobe (`port already in use`)  | Outro processo usa a porta 3306 (provavelmente MySQL local). Pare o MySQL local ou mude a porta no `docker-compose.yml`: `"3307:3306"` e atualize a URL em `ConexaoBD.java`. |
+| `bibliosystem-db` sobe mas banco não existe        | O script SQL ainda está sendo executado. Aguarde 20–30 segundos e tente novamente.                                                                                           |
 
 ---
 
