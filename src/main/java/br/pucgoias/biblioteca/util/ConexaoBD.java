@@ -12,7 +12,7 @@ import java.sql.SQLException;
  */
 public class ConexaoBD {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/bibliosystem?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8";
+    private static final String URL = "jdbc:mysql://localhost:3306/bibliosystem?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci";
     private static final String USUARIO  = "root";
     private static final String SENHA    = "root";
 

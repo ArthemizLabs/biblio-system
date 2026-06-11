@@ -7,6 +7,8 @@ import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.MatteBorder;
 import java.awt.*;
 
 public class TelaMenu extends JFrame implements IdiomaListener {
@@ -14,8 +16,9 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     private final Usuario usuarioLogado;
     private JDesktopPane desktopPane;
 
-    // Labels de estatísticas
-    private JLabel statLivros, statLeitores, statEmprestimos, statReservas;
+    // Cards de estatísticas (painel + label de valor)
+    private JLabel statLivrosValor, statLeitoresValor, statEmprestimosValor, statReservasValor;
+    private JLabel statLivrosLabel, statLeitoresLabel, statEmprestimosLabel, statReservasLabel;
 
     // Seções da sidebar
     private JLabel labelSecaoAcervo, labelSecaoUsuarios, labelSecaoMovimentacoes, labelSecaoSistema;
@@ -46,18 +49,17 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     // ----------------------------------------------------------------
     private JPanel criarTopBar() {
         JPanel top = new JPanel(new BorderLayout());
-        top.setBackground(new Color(28, 40, 60));
+        top.setBackground(new Color(22, 33, 52));
         top.setPreferredSize(new Dimension(0, 48));
-        top.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+        top.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
 
-        JLabel logo = new JLabel("🏛️  BiblioSystem");
+        JLabel logo = new JLabel("BiblioSystem");
         logo.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        logo.setForeground(Color.WHITE);
+        logo.setForeground(new Color(100, 180, 255));
         top.add(logo, BorderLayout.WEST);
 
-        JLabel labelUsuario = new JLabel(
-                "👤  " + usuarioLogado.getLogin() + "  (" + usuarioLogado.getPerfil() + ")"
-        );
+        String perfil = usuarioLogado.getPerfil() == Usuario.Perfil.ADMIN ? "ADMIN" : "FUNCIONARIO";
+        JLabel labelUsuario = new JLabel(usuarioLogado.getLogin() + "  |  " + perfil);
         labelUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         labelUsuario.setForeground(new Color(180, 200, 220));
         top.add(labelUsuario, BorderLayout.EAST);
@@ -71,16 +73,16 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     private JPanel criarSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.setBackground(new Color(36, 50, 70));
-        sidebar.setPreferredSize(new Dimension(180, 0));
+        sidebar.setBackground(new Color(28, 40, 58));
+        sidebar.setPreferredSize(new Dimension(185, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
 
         labelSecaoAcervo = criarSecaoLabel(Mensagens.get("secao.acervo"));
         sidebar.add(labelSecaoAcervo);
-        btnLivros    = criarBotaoSidebar("📚  " + Mensagens.get("menu.livros"),      () -> abrirJanela(new CadastroLivroFrame()));
-        btnAutores   = criarBotaoSidebar("👤  " + Mensagens.get("menu.autores"),     () -> abrirJanela(new CadastroAutorFrame()));
-        btnEditoras  = criarBotaoSidebar("🏢  " + Mensagens.get("menu.editoras"),    () -> abrirJanela(new CadastroEditoraFrame()));
-        btnCategorias= criarBotaoSidebar("🏷️  " + Mensagens.get("menu.categorias"),  () -> abrirJanela(new CadastroCategoriaFrame()));
+        btnLivros     = criarBotaoSidebar(Mensagens.get("menu.livros"),      () -> abrirJanela(new CadastroLivroFrame()));
+        btnAutores    = criarBotaoSidebar(Mensagens.get("menu.autores"),     () -> abrirJanela(new CadastroAutorFrame()));
+        btnEditoras   = criarBotaoSidebar(Mensagens.get("menu.editoras"),    () -> abrirJanela(new CadastroEditoraFrame()));
+        btnCategorias = criarBotaoSidebar(Mensagens.get("menu.categorias"),  () -> abrirJanela(new CadastroCategoriaFrame()));
         sidebar.add(btnLivros);
         sidebar.add(btnAutores);
         sidebar.add(btnEditoras);
@@ -90,16 +92,16 @@ public class TelaMenu extends JFrame implements IdiomaListener {
 
         labelSecaoUsuarios = criarSecaoLabel(Mensagens.get("secao.usuarios"));
         sidebar.add(labelSecaoUsuarios);
-        btnLeitores = criarBotaoSidebar("👥  " + Mensagens.get("menu.leitores"), () -> abrirJanela(new CadastroLeitorFrame()));
+        btnLeitores = criarBotaoSidebar(Mensagens.get("menu.leitores"), () -> abrirJanela(new CadastroLeitorFrame()));
         sidebar.add(btnLeitores);
 
         sidebar.add(criarSeparador());
 
         labelSecaoMovimentacoes = criarSecaoLabel(Mensagens.get("secao.movimentacoes"));
         sidebar.add(labelSecaoMovimentacoes);
-        btnEmprestimos = criarBotaoSidebar("📋  " + Mensagens.get("menu.emprestimos"), () -> abrirJanela(new EmprestimoFrame()));
-        btnReservas    = criarBotaoSidebar("🔖  " + Mensagens.get("menu.reservas"),    () -> abrirJanela(new ReservaFrame()));
-        btnListagem    = criarBotaoSidebar("📊  " + Mensagens.get("menu.listagem"),    () -> new ListagemLivrosFrame().setVisible(true));
+        btnEmprestimos = criarBotaoSidebar(Mensagens.get("menu.emprestimos"), () -> abrirJanela(new EmprestimoFrame()));
+        btnReservas    = criarBotaoSidebar(Mensagens.get("menu.reservas"),    () -> abrirJanela(new ReservaFrame()));
+        btnListagem    = criarBotaoSidebar(Mensagens.get("menu.listagem"),    () -> new ListagemLivrosFrame().setVisible(true));
         sidebar.add(btnEmprestimos);
         sidebar.add(btnReservas);
         sidebar.add(btnListagem);
@@ -110,10 +112,10 @@ public class TelaMenu extends JFrame implements IdiomaListener {
         sidebar.add(labelSecaoSistema);
 
         if (usuarioLogado.getPerfil() == Usuario.Perfil.ADMIN) {
-            btnUsuarios = criarBotaoSidebar("🔑  " + Mensagens.get("menu.usuarios"), () -> abrirJanela(new CadastroUsuarioFrame()));
+            btnUsuarios = criarBotaoSidebar(Mensagens.get("menu.usuarios"), () -> abrirJanela(new CadastroUsuarioFrame()));
             sidebar.add(btnUsuarios);
         }
-        btnIdioma = criarBotaoSidebar("🌐  " + Mensagens.get("menu.idioma"), () -> new ConfiguracaoIdiomaDialog(this).setVisible(true));
+        btnIdioma = criarBotaoSidebar(Mensagens.get("menu.idioma"), () -> new ConfiguracaoIdiomaDialog(this).setVisible(true));
         sidebar.add(btnIdioma);
 
         sidebar.add(Box.createVerticalGlue());
@@ -126,7 +128,7 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     }
 
     // ----------------------------------------------------------------
-    // CENTRO — Stats + Desktop
+    // CENTRO — Stats cards + Desktop
     // ----------------------------------------------------------------
     private JPanel criarCentro() {
         JPanel centro = new JPanel(new BorderLayout());
@@ -140,39 +142,59 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     }
 
     private JPanel criarBarraStats() {
-        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        barra.setBackground(new Color(60, 70, 85));
-        barra.setPreferredSize(new Dimension(0, 38));
+        JPanel barra = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
+        barra.setBackground(new Color(240, 243, 248));
+        barra.setBorder(new MatteBorder(0, 0, 1, 0, new Color(210, 215, 225)));
 
-        statLivros      = criarStatLabel("📚  " + Mensagens.get("stat.livros") + " --");
-        statLeitores    = criarStatLabel("👥  " + Mensagens.get("stat.leitores") + " --");
-        statEmprestimos = criarStatLabel("📋  " + Mensagens.get("stat.emprestimos") + " --");
-        statReservas    = criarStatLabel("🔖  " + Mensagens.get("stat.reservas") + " --");
+        Color[] cores = {
+            new Color(41, 128, 185),
+            new Color(39, 174, 96),
+            new Color(230, 126, 34),
+            new Color(142, 68, 173)
+        };
 
-        barra.add(statLivros);
-        barra.add(criarDivisorStat());
-        barra.add(statLeitores);
-        barra.add(criarDivisorStat());
-        barra.add(statEmprestimos);
-        barra.add(criarDivisorStat());
-        barra.add(statReservas);
+        statLivrosValor      = new JLabel("--");
+        statLeitoresValor    = new JLabel("--");
+        statEmprestimosValor = new JLabel("--");
+        statReservasValor    = new JLabel("--");
+
+        statLivrosLabel      = new JLabel(Mensagens.get("stat.livros"));
+        statLeitoresLabel    = new JLabel(Mensagens.get("stat.leitores"));
+        statEmprestimosLabel = new JLabel(Mensagens.get("stat.emprestimos"));
+        statReservasLabel    = new JLabel(Mensagens.get("stat.reservas"));
+
+        barra.add(criarStatCard(statLivrosLabel,      statLivrosValor,      cores[0]));
+        barra.add(criarStatCard(statLeitoresLabel,    statLeitoresValor,    cores[1]));
+        barra.add(criarStatCard(statEmprestimosLabel, statEmprestimosValor, cores[2]));
+        barra.add(criarStatCard(statReservasLabel,    statReservasValor,    cores[3]));
 
         return barra;
     }
 
-    private JLabel criarStatLabel(String texto) {
-        JLabel label = new JLabel(texto);
-        label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        label.setForeground(new Color(20, 20, 20));
-        label.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
-        return label;
-    }
+    private JPanel criarStatCard(JLabel labelTexto, JLabel labelValor, Color acento) {
+        JPanel card = new JPanel(new BorderLayout(4, 0));
+        card.setBackground(Color.WHITE);
+        card.setBorder(new CompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 225, 232), 1),
+            new CompoundBorder(
+                new MatteBorder(0, 3, 0, 0, acento),
+                BorderFactory.createEmptyBorder(6, 10, 6, 16)
+            )
+        ));
 
-    private JLabel criarDivisorStat() {
-        JLabel div = new JLabel("|");
-        div.setForeground(new Color(100, 110, 125));
-        div.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        return div;
+        labelTexto.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        labelTexto.setForeground(new Color(100, 110, 130));
+
+        labelValor.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        labelValor.setForeground(acento);
+
+        JPanel textos = new JPanel(new GridLayout(2, 1, 0, 0));
+        textos.setOpaque(false);
+        textos.add(labelTexto);
+        textos.add(labelValor);
+
+        card.add(textos, BorderLayout.CENTER);
+        return card;
     }
 
     // ----------------------------------------------------------------
@@ -185,17 +207,22 @@ public class TelaMenu extends JFrame implements IdiomaListener {
         labelSecaoMovimentacoes.setText("  " + Mensagens.get("secao.movimentacoes"));
         labelSecaoSistema.setText("  " + Mensagens.get("secao.sistema"));
 
-        btnLivros.setText("📚  " + Mensagens.get("menu.livros"));
-        btnAutores.setText("👤  " + Mensagens.get("menu.autores"));
-        btnEditoras.setText("🏢  " + Mensagens.get("menu.editoras"));
-        btnCategorias.setText("🏷️  " + Mensagens.get("menu.categorias"));
-        btnLeitores.setText("👥  " + Mensagens.get("menu.leitores"));
-        btnEmprestimos.setText("📋  " + Mensagens.get("menu.emprestimos"));
-        btnReservas.setText("🔖  " + Mensagens.get("menu.reservas"));
-        btnListagem.setText("📊  " + Mensagens.get("menu.listagem"));
-        if (btnUsuarios != null) btnUsuarios.setText("🔑  " + Mensagens.get("menu.usuarios"));
-        btnIdioma.setText("🌐  " + Mensagens.get("menu.idioma"));
-        btnSair.setText("🚪  " + Mensagens.get("menu.sair"));
+        btnLivros.setText(Mensagens.get("menu.livros"));
+        btnAutores.setText(Mensagens.get("menu.autores"));
+        btnEditoras.setText(Mensagens.get("menu.editoras"));
+        btnCategorias.setText(Mensagens.get("menu.categorias"));
+        btnLeitores.setText(Mensagens.get("menu.leitores"));
+        btnEmprestimos.setText(Mensagens.get("menu.emprestimos"));
+        btnReservas.setText(Mensagens.get("menu.reservas"));
+        btnListagem.setText(Mensagens.get("menu.listagem"));
+        if (btnUsuarios != null) btnUsuarios.setText(Mensagens.get("menu.usuarios"));
+        btnIdioma.setText(Mensagens.get("menu.idioma"));
+        btnSair.setText(Mensagens.get("menu.sair"));
+
+        statLivrosLabel.setText(Mensagens.get("stat.livros"));
+        statLeitoresLabel.setText(Mensagens.get("stat.leitores"));
+        statEmprestimosLabel.setText(Mensagens.get("stat.emprestimos"));
+        statReservasLabel.setText(Mensagens.get("stat.reservas"));
 
         atualizarEstatisticas();
     }
@@ -206,34 +233,34 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     private JLabel criarSecaoLabel(String texto) {
         JLabel label = new JLabel("  " + texto);
         label.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        label.setForeground(new Color(120, 150, 180));
+        label.setForeground(new Color(100, 140, 180));
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        label.setMaximumSize(new Dimension(180, 28));
-        label.setBorder(BorderFactory.createEmptyBorder(10, 12, 4, 0));
+        label.setMaximumSize(new Dimension(185, 28));
+        label.setBorder(BorderFactory.createEmptyBorder(12, 12, 4, 0));
         return label;
     }
 
     private JButton criarBotaoSidebar(String texto, Runnable acao) {
         JButton btn = new JButton(texto);
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        btn.setForeground(new Color(210, 220, 235));
-        btn.setBackground(new Color(36, 50, 70));
+        btn.setForeground(new Color(200, 215, 235));
+        btn.setBackground(new Color(28, 40, 58));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(180, 36));
-        btn.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
+        btn.setMaximumSize(new Dimension(185, 36));
+        btn.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override public void mouseEntered(java.awt.event.MouseEvent e) {
-                btn.setBackground(new Color(52, 73, 100));
+                btn.setBackground(new Color(45, 65, 95));
                 btn.setForeground(Color.WHITE);
             }
             @Override public void mouseExited(java.awt.event.MouseEvent e) {
-                btn.setBackground(new Color(36, 50, 70));
-                btn.setForeground(new Color(210, 220, 235));
+                btn.setBackground(new Color(28, 40, 58));
+                btn.setForeground(new Color(200, 215, 235));
             }
         });
 
@@ -242,16 +269,16 @@ public class TelaMenu extends JFrame implements IdiomaListener {
     }
 
     private JButton criarBotaoSair() {
-        JButton btn = new JButton("🚪  " + Mensagens.get("menu.sair"));
+        JButton btn = new JButton(Mensagens.get("menu.sair"));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btn.setForeground(new Color(220, 100, 100));
-        btn.setBackground(new Color(36, 50, 70));
+        btn.setBackground(new Color(28, 40, 58));
         btn.setBorderPainted(false);
         btn.setFocusPainted(false);
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setAlignmentX(Component.LEFT_ALIGNMENT);
-        btn.setMaximumSize(new Dimension(180, 36));
-        btn.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
+        btn.setMaximumSize(new Dimension(185, 36));
+        btn.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -260,7 +287,7 @@ public class TelaMenu extends JFrame implements IdiomaListener {
                 btn.setForeground(new Color(255, 120, 120));
             }
             @Override public void mouseExited(java.awt.event.MouseEvent e) {
-                btn.setBackground(new Color(36, 50, 70));
+                btn.setBackground(new Color(28, 40, 58));
                 btn.setForeground(new Color(220, 100, 100));
             }
         });
@@ -271,9 +298,9 @@ public class TelaMenu extends JFrame implements IdiomaListener {
 
     private JSeparator criarSeparador() {
         JSeparator sep = new JSeparator();
-        sep.setForeground(new Color(55, 72, 95));
-        sep.setBackground(new Color(36, 50, 70));
-        sep.setMaximumSize(new Dimension(180, 1));
+        sep.setForeground(new Color(45, 62, 85));
+        sep.setBackground(new Color(28, 40, 58));
+        sep.setMaximumSize(new Dimension(185, 1));
         return sep;
     }
 
@@ -290,10 +317,10 @@ public class TelaMenu extends JFrame implements IdiomaListener {
                         .filter(r -> r.getStatus() == br.pucgoias.biblioteca.model.Reserva.Status.ABERTA)
                         .toList().size();
 
-                statLivros.setText("📚  " + Mensagens.get("stat.livros") + " " + totalLivros);
-                statLeitores.setText("👥  " + Mensagens.get("stat.leitores") + " " + totalLeitores);
-                statEmprestimos.setText("📋  " + Mensagens.get("stat.emprestimos") + " " + totalEmprestimos);
-                statReservas.setText("🔖  " + Mensagens.get("stat.reservas") + " " + totalReservas);
+                statLivrosValor.setText(String.valueOf(totalLivros));
+                statLeitoresValor.setText(String.valueOf(totalLeitores));
+                statEmprestimosValor.setText(String.valueOf(totalEmprestimos));
+                statReservasValor.setText(String.valueOf(totalReservas));
 
             } catch (BancoDadosException e) {
                 // Silencioso — stats não críticas
