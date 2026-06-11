@@ -4,22 +4,21 @@ import br.pucgoias.biblioteca.dao.EmprestimoDAO;
 import br.pucgoias.biblioteca.controller.LeitorController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
+import br.pucgoias.biblioteca.util.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Janela de registro e controle de Empréstimos.
- * Permite registrar empréstimos, registrar devoluções e listar empréstimos ativos.
- */
-public class EmprestimoFrame extends JInternalFrame {
+public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
 
-    private final EmprestimoDAO dao         = new EmprestimoDAO();
+    private final EmprestimoDAO dao          = new EmprestimoDAO();
     private final LeitorController leitorCtrl = new LeitorController();
     private final LivroController livroCtrl   = new LivroController();
 
@@ -30,18 +29,28 @@ public class EmprestimoFrame extends JInternalFrame {
     private JTable tabela;
     private DefaultTableModel modeloTabela;
 
+    private JTabbedPane abas;
+    private JLabel labelLeitor, labelLivro, labelDevolucao;
+    private JButton btnRegistrarEmprestimo, btnDevolver, btnAtualizarLista;
+
     public EmprestimoFrame() {
         inicializarComponentes();
         configurarJanela();
         carregarCombos();
         listarAtivos();
+        Mensagens.addIdiomaListener(this);
+        addInternalFrameListener(new InternalFrameAdapter() {
+            @Override public void internalFrameClosed(InternalFrameEvent e) {
+                Mensagens.removeIdiomaListener(EmprestimoFrame.this);
+            }
+        });
     }
 
     private void inicializarComponentes() {
-        JTabbedPane abas = new JTabbedPane();
+        abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab("Registrar Empréstimo", criarPainelRegistro());
-        abas.addTab("Empréstimos Ativos",   criarPainelAtivos());
+        abas.addTab(Mensagens.get("aba.registrar.emprestimo"), criarPainelRegistro());
+        abas.addTab(Mensagens.get("aba.emprestimos.ativos"),   criarPainelAtivos());
         add(abas);
     }
 
@@ -53,32 +62,34 @@ public class EmprestimoFrame extends JInternalFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        painel.add(new JLabel("Leitor: *"), gbc);
+        labelLeitor = new JLabel(Mensagens.get("label.leitor"));
+        painel.add(labelLeitor, gbc);
         comboLeitor = new JComboBox<>();
         comboLeitor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboLeitor, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        painel.add(new JLabel("Livro: *"), gbc);
+        labelLivro = new JLabel(Mensagens.get("label.livro"));
+        painel.add(labelLivro, gbc);
         comboLivro = new JComboBox<>();
         comboLivro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboLivro, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        painel.add(new JLabel("Devolução Prevista: *"), gbc);
+        labelDevolucao = new JLabel(Mensagens.get("label.devolucao"));
+        painel.add(labelDevolucao, gbc);
         campoDevolucaoPrevista = new JTextField(12);
         campoDevolucaoPrevista.setToolTipText("Formato: AAAA-MM-DD");
-        // Pré-preenche com 14 dias a partir de hoje
         campoDevolucaoPrevista.setText(LocalDate.now().plusDays(14).toString());
         gbc.gridx = 1; painel.add(campoDevolucaoPrevista, gbc);
 
-        JButton btnRegistrar = criarBotao("Registrar Empréstimo", new Color(39, 174, 96));
+        btnRegistrarEmprestimo = criarBotao(Mensagens.get("btn.registrar.emprestimo"), new Color(39, 174, 96));
         gbc.gridx = 0; gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 6, 6, 6);
-        painel.add(btnRegistrar, gbc);
+        painel.add(btnRegistrarEmprestimo, gbc);
 
-        btnRegistrar.addActionListener(e -> registrarEmprestimo());
+        btnRegistrarEmprestimo.addActionListener(e -> registrarEmprestimo());
 
         return painel;
     }
@@ -88,7 +99,9 @@ public class EmprestimoFrame extends JInternalFrame {
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         modeloTabela = new DefaultTableModel(
-                new String[]{"ID", "Leitor", "Livro", "Empréstimo", "Prev. Devolução", "Status"}, 0) {
+                new String[]{"ID", Mensagens.get("col.leitor"), Mensagens.get("col.livro"),
+                             Mensagens.get("col.data.emprestimo"), Mensagens.get("col.devolucao.prevista"),
+                             Mensagens.get("col.status")}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabela = new JTable(modeloTabela);
@@ -98,18 +111,36 @@ public class EmprestimoFrame extends JInternalFrame {
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnDevolver = criarBotao("Registrar Devolução", new Color(41, 128, 185));
-        JButton btnAtualizar = criarBotao("Atualizar Lista", new Color(127, 140, 141));
+        btnDevolver = criarBotao(Mensagens.get("btn.registrar.devolucao"), new Color(41, 128, 185));
+        btnAtualizarLista = criarBotao(Mensagens.get("btn.atualizar"), new Color(127, 140, 141));
         painelBotoes.add(btnDevolver);
-        painelBotoes.add(btnAtualizar);
+        painelBotoes.add(btnAtualizarLista);
 
         painel.add(painelBotoes, BorderLayout.NORTH);
         painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
 
         btnDevolver.addActionListener(e  -> registrarDevolucao());
-        btnAtualizar.addActionListener(e -> listarAtivos());
+        btnAtualizarLista.addActionListener(e -> listarAtivos());
 
         return painel;
+    }
+
+    @Override
+    public void onIdiomaChanged() {
+        setTitle(Mensagens.get("menu.emprestimos"));
+        abas.setTitleAt(0, Mensagens.get("aba.registrar.emprestimo"));
+        abas.setTitleAt(1, Mensagens.get("aba.emprestimos.ativos"));
+        labelLeitor.setText(Mensagens.get("label.leitor"));
+        labelLivro.setText(Mensagens.get("label.livro"));
+        labelDevolucao.setText(Mensagens.get("label.devolucao"));
+        btnRegistrarEmprestimo.setText(Mensagens.get("btn.registrar.emprestimo"));
+        btnDevolver.setText(Mensagens.get("btn.registrar.devolucao"));
+        btnAtualizarLista.setText(Mensagens.get("btn.atualizar"));
+        modeloTabela.setColumnIdentifiers(new String[]{
+            "ID", Mensagens.get("col.leitor"), Mensagens.get("col.livro"),
+            Mensagens.get("col.data.emprestimo"), Mensagens.get("col.devolucao.prevista"),
+            Mensagens.get("col.status")
+        });
     }
 
     private void registrarEmprestimo() {
@@ -117,7 +148,7 @@ public class EmprestimoFrame extends JInternalFrame {
         Livro livro   = (Livro)  comboLivro.getSelectedItem();
 
         if (leitor == null || livro == null) {
-            JOptionPane.showMessageDialog(this, "Selecione o leitor e o livro.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -136,7 +167,7 @@ public class EmprestimoFrame extends JInternalFrame {
             emp.setDataDevolucaoPrevista(LocalDate.parse(campoDevolucaoPrevista.getText().trim()));
             emp.setStatus(Emprestimo.Status.ATIVO);
             dao.inserir(emp);
-            JOptionPane.showMessageDialog(this, "Empréstimo registrado com sucesso!");
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             campoDevolucaoPrevista.setText(LocalDate.now().plusDays(14).toString());
             listarAtivos();
         } catch (BancoDadosException e) {
@@ -157,7 +188,7 @@ public class EmprestimoFrame extends JInternalFrame {
             emp.setDataDevolucaoReal(LocalDate.now());
             emp.setStatus(Emprestimo.Status.DEVOLVIDO);
             dao.atualizar(emp);
-            JOptionPane.showMessageDialog(this, "Devolução registrada com sucesso!");
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             listarAtivos();
         } catch (BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

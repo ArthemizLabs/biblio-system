@@ -4,20 +4,19 @@ import br.pucgoias.biblioteca.dao.ReservaDAO;
 import br.pucgoias.biblioteca.controller.LeitorController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
+import br.pucgoias.biblioteca.util.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Janela de registro de Reservas de livros.
- * Verifica disponibilidade antes de registrar e lista reservas abertas.
- */
-public class ReservaFrame extends JInternalFrame {
+public class ReservaFrame extends JInternalFrame implements IdiomaListener {
 
     private final ReservaDAO dao              = new ReservaDAO();
     private final LeitorController leitorCtrl = new LeitorController();
@@ -29,18 +28,28 @@ public class ReservaFrame extends JInternalFrame {
     private JTable tabela;
     private DefaultTableModel modeloTabela;
 
+    private JTabbedPane abas;
+    private JLabel labelLeitor, labelLivro;
+    private JButton btnReservar, btnCancelar, btnAtualizar;
+
     public ReservaFrame() {
         inicializarComponentes();
         configurarJanela();
         carregarCombos();
         listarReservas();
+        Mensagens.addIdiomaListener(this);
+        addInternalFrameListener(new InternalFrameAdapter() {
+            @Override public void internalFrameClosed(InternalFrameEvent e) {
+                Mensagens.removeIdiomaListener(ReservaFrame.this);
+            }
+        });
     }
 
     private void inicializarComponentes() {
-        JTabbedPane abas = new JTabbedPane();
+        abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab("Nova Reserva",    criarPainelReserva());
-        abas.addTab("Reservas Abertas", criarPainelLista());
+        abas.addTab(Mensagens.get("aba.reservas.novas"),  criarPainelReserva());
+        abas.addTab(Mensagens.get("aba.reservas.abertas"), criarPainelLista());
         add(abas);
     }
 
@@ -52,18 +61,20 @@ public class ReservaFrame extends JInternalFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        painel.add(new JLabel("Leitor: *"), gbc);
+        labelLeitor = new JLabel(Mensagens.get("label.leitor"));
+        painel.add(labelLeitor, gbc);
         comboLeitor = new JComboBox<>();
         comboLeitor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboLeitor, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        painel.add(new JLabel("Livro: *"), gbc);
+        labelLivro = new JLabel(Mensagens.get("label.livro"));
+        painel.add(labelLivro, gbc);
         comboLivro = new JComboBox<>();
         comboLivro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboLivro, gbc);
 
-        JButton btnReservar = criarBotao("Registrar Reserva", new Color(39, 174, 96));
+        btnReservar = criarBotao(Mensagens.get("btn.registrar.reserva"), new Color(39, 174, 96));
         gbc.gridx = 0; gbc.gridy = 2;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 6, 6, 6);
@@ -79,7 +90,8 @@ public class ReservaFrame extends JInternalFrame {
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         modeloTabela = new DefaultTableModel(
-                new String[]{"ID", "Leitor", "Livro", "Data Reserva", "Status"}, 0) {
+                new String[]{"ID", Mensagens.get("col.leitor"), Mensagens.get("col.livro"),
+                             Mensagens.get("col.data.reserva"), Mensagens.get("col.status")}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabela = new JTable(modeloTabela);
@@ -89,8 +101,8 @@ public class ReservaFrame extends JInternalFrame {
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton btnCancelar = criarBotao("Cancelar Reserva", new Color(192, 57, 43));
-        JButton btnAtualizar = criarBotao("Atualizar Lista", new Color(127, 140, 141));
+        btnCancelar = criarBotao(Mensagens.get("btn.cancelar.reserva"), new Color(192, 57, 43));
+        btnAtualizar = criarBotao(Mensagens.get("btn.atualizar"), new Color(127, 140, 141));
         painelBotoes.add(btnCancelar);
         painelBotoes.add(btnAtualizar);
 
@@ -103,12 +115,28 @@ public class ReservaFrame extends JInternalFrame {
         return painel;
     }
 
+    @Override
+    public void onIdiomaChanged() {
+        setTitle(Mensagens.get("menu.reservas"));
+        abas.setTitleAt(0, Mensagens.get("aba.reservas.novas"));
+        abas.setTitleAt(1, Mensagens.get("aba.reservas.abertas"));
+        labelLeitor.setText(Mensagens.get("label.leitor"));
+        labelLivro.setText(Mensagens.get("label.livro"));
+        btnReservar.setText(Mensagens.get("btn.registrar.reserva"));
+        btnCancelar.setText(Mensagens.get("btn.cancelar.reserva"));
+        btnAtualizar.setText(Mensagens.get("btn.atualizar"));
+        modeloTabela.setColumnIdentifiers(new String[]{
+            "ID", Mensagens.get("col.leitor"), Mensagens.get("col.livro"),
+            Mensagens.get("col.data.reserva"), Mensagens.get("col.status")
+        });
+    }
+
     private void registrarReserva() {
         Leitor leitor = (Leitor) comboLeitor.getSelectedItem();
         Livro livro   = (Livro)  comboLivro.getSelectedItem();
 
         if (leitor == null || livro == null) {
-            JOptionPane.showMessageDialog(this, "Selecione o leitor e o livro.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -124,7 +152,7 @@ public class ReservaFrame extends JInternalFrame {
             reserva.setDataReserva(LocalDate.now());
             reserva.setStatus(Reserva.Status.ABERTA);
             dao.inserir(reserva);
-            JOptionPane.showMessageDialog(this, "Reserva registrada com sucesso!");
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             listarReservas();
         } catch (BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -143,7 +171,7 @@ public class ReservaFrame extends JInternalFrame {
             if (reserva == null) return;
             reserva.setStatus(Reserva.Status.CANCELADA);
             dao.atualizar(reserva);
-            JOptionPane.showMessageDialog(this, "Reserva cancelada.");
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             listarReservas();
         } catch (BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);

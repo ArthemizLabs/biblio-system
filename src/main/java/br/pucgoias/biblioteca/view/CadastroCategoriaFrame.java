@@ -2,20 +2,19 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.model.Categoria;
+import br.pucgoias.biblioteca.util.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Janela de cadastro de Categorias.
- * Possui abas de Cadastro e Pesquisa com CRUD completo via CategoriaController.
- */
-public class CadastroCategoriaFrame extends JInternalFrame {
+public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaListener {
 
     private final CategoriaController controller = new CategoriaController();
 
@@ -24,13 +23,22 @@ public class CadastroCategoriaFrame extends JInternalFrame {
     private JTable tabela;
     private DefaultTableModel modeloTabela;
 
+    private JTabbedPane abas;
+    private JLabel labelCodigo, labelNome, labelDescricao, labelPesquisaNome;
+
     public CadastroCategoriaFrame() {
         inicializarComponentes();
         configurarJanela();
+        Mensagens.addIdiomaListener(this);
+        addInternalFrameListener(new InternalFrameAdapter() {
+            @Override public void internalFrameClosed(InternalFrameEvent e) {
+                Mensagens.removeIdiomaListener(CadastroCategoriaFrame.this);
+            }
+        });
     }
 
     private void inicializarComponentes() {
-        JTabbedPane abas = new JTabbedPane();
+        abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
         abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
@@ -45,20 +53,23 @@ public class CadastroCategoriaFrame extends JInternalFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         gbc.gridx = 0; gbc.gridy = 0;
-        painel.add(new JLabel("Código:"), gbc);
+        labelCodigo = new JLabel(Mensagens.get("label.codigo"));
+        painel.add(labelCodigo, gbc);
         campoId = new JTextField(8);
         campoId.setEditable(false);
         campoId.setBackground(new Color(230, 230, 230));
         gbc.gridx = 1; painel.add(campoId, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        painel.add(new JLabel("Nome: *"), gbc);
+        labelNome = new JLabel(Mensagens.get("label.nome"));
+        painel.add(labelNome, gbc);
         campoNome = new JTextField(25);
         gbc.gridx = 1; painel.add(campoNome, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        painel.add(new JLabel("Descrição:"), gbc);
+        labelDescricao = new JLabel(Mensagens.get("label.descricao"));
+        painel.add(labelDescricao, gbc);
         campoDescricao = new JTextArea(3, 25);
         campoDescricao.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         campoDescricao.setLineWrap(true);
@@ -94,14 +105,15 @@ public class CadastroCategoriaFrame extends JInternalFrame {
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        painelBusca.add(new JLabel("Nome:"));
+        labelPesquisaNome = new JLabel(Mensagens.get("label.nome"));
+        painelBusca.add(labelPesquisaNome);
         JTextField campoPesquisa = new JTextField(20);
         JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
         painelBusca.add(campoPesquisa);
         painelBusca.add(btnPesquisar);
 
         modeloTabela = new DefaultTableModel(
-                new String[]{"Código", "Nome", "Descrição"}, 0) {
+                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.descricao")}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabela = new JTable(modeloTabela);
@@ -120,6 +132,20 @@ public class CadastroCategoriaFrame extends JInternalFrame {
         campoPesquisa.addActionListener(e -> pesquisar());
 
         return painel;
+    }
+
+    @Override
+    public void onIdiomaChanged() {
+        setTitle(Mensagens.get("menu.categorias"));
+        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
+        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
+        labelCodigo.setText(Mensagens.get("label.codigo"));
+        labelNome.setText(Mensagens.get("label.nome"));
+        labelDescricao.setText(Mensagens.get("label.descricao"));
+        labelPesquisaNome.setText(Mensagens.get("label.nome"));
+        modeloTabela.setColumnIdentifiers(new String[]{
+            Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.descricao")
+        });
     }
 
     private void salvar() {
@@ -184,7 +210,6 @@ public class CadastroCategoriaFrame extends JInternalFrame {
         campoNome.setText(modeloTabela.getValueAt(linha, 1).toString());
         Object desc = modeloTabela.getValueAt(linha, 2);
         campoDescricao.setText(desc != null ? desc.toString() : "");
-        JTabbedPane abas = (JTabbedPane) getContentPane().getComponent(0);
         abas.setSelectedIndex(0);
     }
 

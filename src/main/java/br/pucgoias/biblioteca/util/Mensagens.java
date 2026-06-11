@@ -1,5 +1,7 @@
 package br.pucgoias.biblioteca.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -11,6 +13,7 @@ public class Mensagens {
 
     private static ResourceBundle bundle;
     private static Locale localAtual = new Locale("pt", "BR"); // padrão: Português
+    private static final List<IdiomaListener> listeners = new ArrayList<>();
 
     // Carrega o bundle ao inicializar
     static {
@@ -39,9 +42,18 @@ public class Mensagens {
     public static void setIdioma(Locale locale) {
         localAtual = locale;
         carregarBundle();
+        new ArrayList<>(listeners).forEach(IdiomaListener::onIdiomaChanged);
     }
 
     public static Locale getLocalAtual() {
         return localAtual;
+    }
+
+    public static void addIdiomaListener(IdiomaListener l) {
+        listeners.add(l);
+    }
+
+    public static void removeIdiomaListener(IdiomaListener l) {
+        listeners.remove(l);
     }
 }

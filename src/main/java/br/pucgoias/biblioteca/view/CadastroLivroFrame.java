@@ -5,11 +5,14 @@ import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.controller.EditoraController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
+import br.pucgoias.biblioteca.util.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
+import javax.swing.event.InternalFrameAdapter;
+import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -18,46 +21,47 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.util.List;
 
-/**
- * Janela de cadastro de Livros — cadastro intermediário principal do sistema.
- * Possui pesquisa complexa com filtro por Código, Título ou ISBN via JComboBox.
- */
-public class CadastroLivroFrame extends JInternalFrame {
+public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener {
 
-    private final LivroController livroController       = new LivroController();
-    private final AutorController autorController       = new AutorController();
-    private final EditoraController editoraController   = new EditoraController();
+    private final LivroController livroController         = new LivroController();
+    private final AutorController autorController         = new AutorController();
+    private final EditoraController editoraController     = new EditoraController();
     private final CategoriaController categoriaController = new CategoriaController();
 
-    // Aba Cadastro
     private JTextField campoId, campoTitulo, campoIsbn, campoAno, campoQtd;
     private JComboBox<Autor>     comboAutor;
     private JComboBox<Editora>   comboEditora;
     private JComboBox<Categoria> comboCategoria;
 
-    // Aba Pesquisa
     private JComboBox<String> comboFiltro;
     private JTextField campoPesquisa;
     private JTable tabela;
     private DefaultTableModel modeloTabela;
 
+    private JTabbedPane abas;
+    private JLabel labelCodigo, labelTitulo, labelIsbn, labelAno, labelQtd;
+    private JLabel labelAutor, labelEditora, labelCategoria, labelPesquisarPor;
+
     public CadastroLivroFrame() {
         inicializarComponentes();
         configurarJanela();
         carregarCombos();
+        Mensagens.addIdiomaListener(this);
+        addInternalFrameListener(new InternalFrameAdapter() {
+            @Override public void internalFrameClosed(InternalFrameEvent e) {
+                Mensagens.removeIdiomaListener(CadastroLivroFrame.this);
+            }
+        });
     }
 
     private void inicializarComponentes() {
-        JTabbedPane abas = new JTabbedPane();
+        abas = new JTabbedPane();
         abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
         abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
         add(abas);
     }
 
-    // ----------------------------------------------------------------
-    // ABA CADASTRO
-    // ----------------------------------------------------------------
     private JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
@@ -65,63 +69,62 @@ public class CadastroLivroFrame extends JInternalFrame {
         gbc.insets = new Insets(6, 6, 6, 6);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Código
         gbc.gridx = 0; gbc.gridy = 0;
-        painel.add(new JLabel("Código:"), gbc);
+        labelCodigo = new JLabel(Mensagens.get("label.codigo"));
+        painel.add(labelCodigo, gbc);
         campoId = new JTextField(8);
         campoId.setEditable(false);
         campoId.setBackground(new Color(230, 230, 230));
         gbc.gridx = 1; painel.add(campoId, gbc);
 
-        // Título
         gbc.gridx = 0; gbc.gridy = 1;
-        painel.add(new JLabel("Título: *"), gbc);
+        labelTitulo = new JLabel(Mensagens.get("label.titulo"));
+        painel.add(labelTitulo, gbc);
         campoTitulo = new JTextField(30);
         gbc.gridx = 1; painel.add(campoTitulo, gbc);
 
-        // ISBN — somente números
         gbc.gridx = 0; gbc.gridy = 2;
-        painel.add(new JLabel("ISBN: *"), gbc);
+        labelIsbn = new JLabel(Mensagens.get("label.isbn"));
+        painel.add(labelIsbn, gbc);
         campoIsbn = new JTextField(20);
         aplicarFiltroNumerico(campoIsbn);
         gbc.gridx = 1; painel.add(campoIsbn, gbc);
 
-        // Ano de Publicação — somente números, max 4 dígitos
         gbc.gridx = 0; gbc.gridy = 3;
-        painel.add(new JLabel("Ano Publicação: *"), gbc);
+        labelAno = new JLabel(Mensagens.get("label.ano"));
+        painel.add(labelAno, gbc);
         campoAno = new JTextField(6);
         aplicarFiltroAno(campoAno);
         gbc.gridx = 1; painel.add(campoAno, gbc);
 
-        // Quantidade — somente números
         gbc.gridx = 0; gbc.gridy = 4;
-        painel.add(new JLabel("Quantidade: *"), gbc);
+        labelQtd = new JLabel(Mensagens.get("label.quantidade"));
+        painel.add(labelQtd, gbc);
         campoQtd = new JTextField(6);
         aplicarFiltroNumerico(campoQtd);
         gbc.gridx = 1; painel.add(campoQtd, gbc);
 
-        // Autor
         gbc.gridx = 0; gbc.gridy = 5;
-        painel.add(new JLabel("Autor: *"), gbc);
+        labelAutor = new JLabel(Mensagens.get("label.autor"));
+        painel.add(labelAutor, gbc);
         comboAutor = new JComboBox<>();
         comboAutor.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboAutor, gbc);
 
-        // Editora
         gbc.gridx = 0; gbc.gridy = 6;
-        painel.add(new JLabel("Editora: *"), gbc);
+        labelEditora = new JLabel(Mensagens.get("label.editora"));
+        painel.add(labelEditora, gbc);
         comboEditora = new JComboBox<>();
         comboEditora.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboEditora, gbc);
 
-        // Categoria
         gbc.gridx = 0; gbc.gridy = 7;
-        painel.add(new JLabel("Categoria: *"), gbc);
+        labelCategoria = new JLabel(Mensagens.get("label.categoria"));
+        painel.add(labelCategoria, gbc);
         comboCategoria = new JComboBox<>();
         comboCategoria.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboCategoria, gbc);
 
-        // Botões
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
@@ -145,17 +148,17 @@ public class CadastroLivroFrame extends JInternalFrame {
         return painel;
     }
 
-    // ----------------------------------------------------------------
-    // ABA PESQUISA COMPLEXA
-    // ----------------------------------------------------------------
     private JPanel criarPainelPesquisa() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        painelBusca.add(new JLabel("Pesquisar por:"));
+        labelPesquisarPor = new JLabel(Mensagens.get("label.pesquisar.por"));
+        painelBusca.add(labelPesquisarPor);
 
-        comboFiltro = new JComboBox<>(new String[]{"Título", "Código", "ISBN"});
+        comboFiltro = new JComboBox<>(new String[]{
+            Mensagens.get("col.titulo"), Mensagens.get("col.codigo"), Mensagens.get("col.isbn")
+        });
         comboFiltro.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         painelBusca.add(comboFiltro);
 
@@ -165,12 +168,10 @@ public class CadastroLivroFrame extends JInternalFrame {
         JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
         painelBusca.add(btnPesquisar);
 
-        // Validação dinâmica conforme filtro selecionado
         comboFiltro.addActionListener(e -> {
             campoPesquisa.setText("");
             int idx = comboFiltro.getSelectedIndex();
             if (idx == 1 || idx == 2) {
-                // Código ou ISBN — só números
                 aplicarFiltroNumerico(campoPesquisa);
             } else {
                 ((AbstractDocument) campoPesquisa.getDocument()).setDocumentFilter(null);
@@ -178,7 +179,9 @@ public class CadastroLivroFrame extends JInternalFrame {
         });
 
         modeloTabela = new DefaultTableModel(
-                new String[]{"Código", "Título", "ISBN", "Ano", "Qtd", "Autor", "Categoria"}, 0) {
+                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.titulo"), Mensagens.get("col.isbn"),
+                             Mensagens.get("col.ano"), Mensagens.get("col.quantidade"),
+                             Mensagens.get("col.autor"), Mensagens.get("col.categoria")}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabela = new JTable(modeloTabela);
@@ -190,7 +193,6 @@ public class CadastroLivroFrame extends JInternalFrame {
             if (!e.getValueIsAdjusting()) carregarDaTabela();
         });
 
-        // Ajuste de largura das colunas
         tabela.getColumnModel().getColumn(0).setPreferredWidth(55);
         tabela.getColumnModel().getColumn(1).setPreferredWidth(200);
         tabela.getColumnModel().getColumn(2).setPreferredWidth(120);
@@ -208,9 +210,33 @@ public class CadastroLivroFrame extends JInternalFrame {
         return painel;
     }
 
-    // ----------------------------------------------------------------
-    // AÇÕES
-    // ----------------------------------------------------------------
+    @Override
+    public void onIdiomaChanged() {
+        setTitle(Mensagens.get("menu.livros"));
+        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
+        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
+        labelCodigo.setText(Mensagens.get("label.codigo"));
+        labelTitulo.setText(Mensagens.get("label.titulo"));
+        labelIsbn.setText(Mensagens.get("label.isbn"));
+        labelAno.setText(Mensagens.get("label.ano"));
+        labelQtd.setText(Mensagens.get("label.quantidade"));
+        labelAutor.setText(Mensagens.get("label.autor"));
+        labelEditora.setText(Mensagens.get("label.editora"));
+        labelCategoria.setText(Mensagens.get("label.categoria"));
+        labelPesquisarPor.setText(Mensagens.get("label.pesquisar.por"));
+        int sel = comboFiltro.getSelectedIndex();
+        comboFiltro.removeAllItems();
+        comboFiltro.addItem(Mensagens.get("col.titulo"));
+        comboFiltro.addItem(Mensagens.get("col.codigo"));
+        comboFiltro.addItem(Mensagens.get("col.isbn"));
+        comboFiltro.setSelectedIndex(sel);
+        modeloTabela.setColumnIdentifiers(new String[]{
+            Mensagens.get("col.codigo"), Mensagens.get("col.titulo"), Mensagens.get("col.isbn"),
+            Mensagens.get("col.ano"), Mensagens.get("col.quantidade"),
+            Mensagens.get("col.autor"), Mensagens.get("col.categoria")
+        });
+    }
+
     private void salvar() {
         try {
             Livro livro = montarLivro();
@@ -263,7 +289,6 @@ public class CadastroLivroFrame extends JInternalFrame {
 
         try {
             if (filtro == 1) {
-                // Por Código
                 if (texto.isEmpty()) {
                     lista = livroController.listarTodos();
                 } else {
@@ -271,7 +296,6 @@ public class CadastroLivroFrame extends JInternalFrame {
                     lista = l != null ? List.of(l) : List.of();
                 }
             } else if (filtro == 2) {
-                // Por ISBN
                 if (texto.isEmpty()) {
                     lista = livroController.listarTodos();
                 } else {
@@ -279,7 +303,6 @@ public class CadastroLivroFrame extends JInternalFrame {
                     lista = l != null ? List.of(l) : List.of();
                 }
             } else {
-                // Por Título
                 lista = livroController.buscarPorTitulo(texto);
             }
         } catch (BancoDadosException e) {
@@ -319,7 +342,6 @@ public class CadastroLivroFrame extends JInternalFrame {
         selecionarCombo(comboEditora, livro.getEditora() != null ? livro.getEditora().getId() : -1);
         selecionarCombo(comboCategoria, livro.getCategoria() != null ? livro.getCategoria().getId() : -1);
 
-        JTabbedPane abas = (JTabbedPane) getContentPane().getComponent(0);
         abas.setSelectedIndex(0);
     }
 
@@ -332,9 +354,6 @@ public class CadastroLivroFrame extends JInternalFrame {
         campoTitulo.requestFocus();
     }
 
-    // ----------------------------------------------------------------
-    // UTILITÁRIOS
-    // ----------------------------------------------------------------
     private Livro montarLivro() {
         Livro livro = new Livro();
         livro.setTitulo(campoTitulo.getText());

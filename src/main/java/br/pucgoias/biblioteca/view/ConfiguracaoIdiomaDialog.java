@@ -15,7 +15,7 @@ public class ConfiguracaoIdiomaDialog extends JDialog {
     private JRadioButton radioIngles;
 
     public ConfiguracaoIdiomaDialog(JFrame parent) {
-        super(parent, "Configuração de Idioma", true);
+        super(parent, Mensagens.get("dialogo.idioma.titulo"), true);
         inicializarComponentes();
         configurarJanela();
     }
@@ -27,7 +27,7 @@ public class ConfiguracaoIdiomaDialog extends JDialog {
         gbc.insets = new Insets(8, 8, 8, 8);
         gbc.anchor = GridBagConstraints.WEST;
 
-        JLabel labelTitulo = new JLabel("Selecione o idioma do sistema:");
+        JLabel labelTitulo = new JLabel(Mensagens.get("dialogo.idioma.label"));
         labelTitulo.setFont(new Font("Segoe UI", Font.BOLD, 13));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         painel.add(labelTitulo, gbc);
@@ -52,10 +52,10 @@ public class ConfiguracaoIdiomaDialog extends JDialog {
 
         // Botões
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton btnConfirmar = new JButton("Confirmar");
+        JButton btnConfirmar = new JButton(Mensagens.get("btn.confirmar"));
         btnConfirmar.setFont(new Font("Segoe UI", Font.BOLD, 12));
         btnConfirmar.setBackground(new Color(39, 174, 96));
-        btnConfirmar.setForeground(Color.WHITE);
+        btnConfirmar.setForeground(Color.BLACK);
         btnConfirmar.setFocusPainted(false);
 
         JButton btnCancelar = new JButton(Mensagens.get("btn.cancelar"));
@@ -82,12 +82,7 @@ public class ConfiguracaoIdiomaDialog extends JDialog {
         Locale novoLocale = radioIngles.isSelected()
                 ? new Locale("en", "US")
                 : new Locale("pt", "BR");
-
         Mensagens.setIdioma(novoLocale);
-
-        JOptionPane.showMessageDialog(this,
-                "Idioma alterado com sucesso!\nReinicie as janelas abertas para aplicar.",
-                "Idioma", JOptionPane.INFORMATION_MESSAGE);
         dispose();
     }
 

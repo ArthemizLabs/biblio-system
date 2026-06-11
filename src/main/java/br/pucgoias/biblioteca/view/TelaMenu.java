@@ -2,38 +2,43 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.dao.*;
 import br.pucgoias.biblioteca.model.Usuario;
+import br.pucgoias.biblioteca.util.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
-/**
- * Janela principal do BiblioSystem após o login.
- * Layout com TopBar, Sidebar de navegação e JDesktopPane central.
- */
-public class TelaMenu extends JFrame {
+public class TelaMenu extends JFrame implements IdiomaListener {
 
     private final Usuario usuarioLogado;
     private JDesktopPane desktopPane;
 
-    // Labels das estatísticas
+    // Labels de estatísticas
     private JLabel statLivros, statLeitores, statEmprestimos, statReservas;
+
+    // Seções da sidebar
+    private JLabel labelSecaoAcervo, labelSecaoUsuarios, labelSecaoMovimentacoes, labelSecaoSistema;
+
+    // Botões da sidebar
+    private JButton btnLivros, btnAutores, btnEditoras, btnCategorias;
+    private JButton btnLeitores;
+    private JButton btnEmprestimos, btnReservas, btnListagem;
+    private JButton btnUsuarios, btnIdioma, btnSair;
 
     public TelaMenu(Usuario usuarioLogado) {
         this.usuarioLogado = usuarioLogado;
         inicializarComponentes();
         configurarJanela();
         atualizarEstatisticas();
+        Mensagens.addIdiomaListener(this);
     }
 
     private void inicializarComponentes() {
         setLayout(new BorderLayout());
-
-        add(criarTopBar(),   BorderLayout.NORTH);
-        add(criarSidebar(),  BorderLayout.WEST);
-        add(criarCentro(),   BorderLayout.CENTER);
+        add(criarTopBar(),  BorderLayout.NORTH);
+        add(criarSidebar(), BorderLayout.WEST);
+        add(criarCentro(),  BorderLayout.CENTER);
     }
 
     // ----------------------------------------------------------------
@@ -45,13 +50,11 @@ public class TelaMenu extends JFrame {
         top.setPreferredSize(new Dimension(0, 48));
         top.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
 
-        // Logo
         JLabel logo = new JLabel("🏛️  BiblioSystem");
         logo.setFont(new Font("Segoe UI", Font.BOLD, 18));
         logo.setForeground(Color.WHITE);
         top.add(logo, BorderLayout.WEST);
 
-        // Usuário logado
         JLabel labelUsuario = new JLabel(
                 "👤  " + usuarioLogado.getLogin() + "  (" + usuarioLogado.getPerfil() + ")"
         );
@@ -72,46 +75,52 @@ public class TelaMenu extends JFrame {
         sidebar.setPreferredSize(new Dimension(180, 0));
         sidebar.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
 
-        // Seção Acervo
-        sidebar.add(criarSecaoLabel("ACERVO"));
-        sidebar.add(criarBotaoSidebar("📚  Livros",      () -> abrirJanela(new CadastroLivroFrame())));
-        sidebar.add(criarBotaoSidebar("👤  Autores",     () -> abrirJanela(new CadastroAutorFrame())));
-        sidebar.add(criarBotaoSidebar("🏢  Editoras",    () -> abrirJanela(new CadastroEditoraFrame())));
-        sidebar.add(criarBotaoSidebar("🏷️  Categorias",  () -> abrirJanela(new CadastroCategoriaFrame())));
+        labelSecaoAcervo = criarSecaoLabel(Mensagens.get("secao.acervo"));
+        sidebar.add(labelSecaoAcervo);
+        btnLivros    = criarBotaoSidebar("📚  " + Mensagens.get("menu.livros"),      () -> abrirJanela(new CadastroLivroFrame()));
+        btnAutores   = criarBotaoSidebar("👤  " + Mensagens.get("menu.autores"),     () -> abrirJanela(new CadastroAutorFrame()));
+        btnEditoras  = criarBotaoSidebar("🏢  " + Mensagens.get("menu.editoras"),    () -> abrirJanela(new CadastroEditoraFrame()));
+        btnCategorias= criarBotaoSidebar("🏷️  " + Mensagens.get("menu.categorias"),  () -> abrirJanela(new CadastroCategoriaFrame()));
+        sidebar.add(btnLivros);
+        sidebar.add(btnAutores);
+        sidebar.add(btnEditoras);
+        sidebar.add(btnCategorias);
 
-        // Separador
         sidebar.add(criarSeparador());
 
-        // Seção Usuários
-        sidebar.add(criarSecaoLabel("USUÁRIOS"));
-        sidebar.add(criarBotaoSidebar("👥  Leitores",    () -> abrirJanela(new CadastroLeitorFrame())));
+        labelSecaoUsuarios = criarSecaoLabel(Mensagens.get("secao.usuarios"));
+        sidebar.add(labelSecaoUsuarios);
+        btnLeitores = criarBotaoSidebar("👥  " + Mensagens.get("menu.leitores"), () -> abrirJanela(new CadastroLeitorFrame()));
+        sidebar.add(btnLeitores);
 
-        // Separador
         sidebar.add(criarSeparador());
 
-        // Seção Movimentações
-        sidebar.add(criarSecaoLabel("MOVIMENTAÇÕES"));
-        sidebar.add(criarBotaoSidebar("📋  Empréstimos", () -> abrirJanela(new EmprestimoFrame())));
-        sidebar.add(criarBotaoSidebar("🔖  Reservas",    () -> abrirJanela(new ReservaFrame())));
-        sidebar.add(criarBotaoSidebar("📊  Listagem",    () -> new ListagemLivrosFrame().setVisible(true)));
+        labelSecaoMovimentacoes = criarSecaoLabel(Mensagens.get("secao.movimentacoes"));
+        sidebar.add(labelSecaoMovimentacoes);
+        btnEmprestimos = criarBotaoSidebar("📋  " + Mensagens.get("menu.emprestimos"), () -> abrirJanela(new EmprestimoFrame()));
+        btnReservas    = criarBotaoSidebar("🔖  " + Mensagens.get("menu.reservas"),    () -> abrirJanela(new ReservaFrame()));
+        btnListagem    = criarBotaoSidebar("📊  " + Mensagens.get("menu.listagem"),    () -> new ListagemLivrosFrame().setVisible(true));
+        sidebar.add(btnEmprestimos);
+        sidebar.add(btnReservas);
+        sidebar.add(btnListagem);
 
-        // Separador
         sidebar.add(criarSeparador());
 
-        // Seção Sistema
-        sidebar.add(criarSecaoLabel("SISTEMA"));
+        labelSecaoSistema = criarSecaoLabel(Mensagens.get("secao.sistema"));
+        sidebar.add(labelSecaoSistema);
 
-        // Usuários só para ADMIN
         if (usuarioLogado.getPerfil() == Usuario.Perfil.ADMIN) {
-            sidebar.add(criarBotaoSidebar("🔑  Usuários", () -> abrirJanela(new CadastroUsuarioFrame())));
+            btnUsuarios = criarBotaoSidebar("🔑  " + Mensagens.get("menu.usuarios"), () -> abrirJanela(new CadastroUsuarioFrame()));
+            sidebar.add(btnUsuarios);
         }
-        sidebar.add(criarBotaoSidebar("🌐  Idioma",  () -> new ConfiguracaoIdiomaDialog(this).setVisible(true)));
+        btnIdioma = criarBotaoSidebar("🌐  " + Mensagens.get("menu.idioma"), () -> new ConfiguracaoIdiomaDialog(this).setVisible(true));
+        sidebar.add(btnIdioma);
 
-        // Espaço flexível empurra o Sair para baixo
         sidebar.add(Box.createVerticalGlue());
-
         sidebar.add(criarSeparador());
-        sidebar.add(criarBotaoSair());
+
+        btnSair = criarBotaoSair();
+        sidebar.add(btnSair);
 
         return sidebar;
     }
@@ -135,10 +144,10 @@ public class TelaMenu extends JFrame {
         barra.setBackground(new Color(60, 70, 85));
         barra.setPreferredSize(new Dimension(0, 38));
 
-        statLivros      = criarStatLabel("📚  Livros: --");
-        statLeitores    = criarStatLabel("👥  Leitores: --");
-        statEmprestimos = criarStatLabel("📋  Empréstimos ativos: --");
-        statReservas    = criarStatLabel("🔖  Reservas abertas: --");
+        statLivros      = criarStatLabel("📚  " + Mensagens.get("stat.livros") + " --");
+        statLeitores    = criarStatLabel("👥  " + Mensagens.get("stat.leitores") + " --");
+        statEmprestimos = criarStatLabel("📋  " + Mensagens.get("stat.emprestimos") + " --");
+        statReservas    = criarStatLabel("🔖  " + Mensagens.get("stat.reservas") + " --");
 
         barra.add(statLivros);
         barra.add(criarDivisorStat());
@@ -167,6 +176,31 @@ public class TelaMenu extends JFrame {
     }
 
     // ----------------------------------------------------------------
+    // LISTENER DE IDIOMA
+    // ----------------------------------------------------------------
+    @Override
+    public void onIdiomaChanged() {
+        labelSecaoAcervo.setText("  " + Mensagens.get("secao.acervo"));
+        labelSecaoUsuarios.setText("  " + Mensagens.get("secao.usuarios"));
+        labelSecaoMovimentacoes.setText("  " + Mensagens.get("secao.movimentacoes"));
+        labelSecaoSistema.setText("  " + Mensagens.get("secao.sistema"));
+
+        btnLivros.setText("📚  " + Mensagens.get("menu.livros"));
+        btnAutores.setText("👤  " + Mensagens.get("menu.autores"));
+        btnEditoras.setText("🏢  " + Mensagens.get("menu.editoras"));
+        btnCategorias.setText("🏷️  " + Mensagens.get("menu.categorias"));
+        btnLeitores.setText("👥  " + Mensagens.get("menu.leitores"));
+        btnEmprestimos.setText("📋  " + Mensagens.get("menu.emprestimos"));
+        btnReservas.setText("🔖  " + Mensagens.get("menu.reservas"));
+        btnListagem.setText("📊  " + Mensagens.get("menu.listagem"));
+        if (btnUsuarios != null) btnUsuarios.setText("🔑  " + Mensagens.get("menu.usuarios"));
+        btnIdioma.setText("🌐  " + Mensagens.get("menu.idioma"));
+        btnSair.setText("🚪  " + Mensagens.get("menu.sair"));
+
+        atualizarEstatisticas();
+    }
+
+    // ----------------------------------------------------------------
     // COMPONENTES SIDEBAR
     // ----------------------------------------------------------------
     private JLabel criarSecaoLabel(String texto) {
@@ -192,7 +226,6 @@ public class TelaMenu extends JFrame {
         btn.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 0));
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        // Hover
         btn.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override public void mouseEntered(java.awt.event.MouseEvent e) {
                 btn.setBackground(new Color(52, 73, 100));
@@ -209,7 +242,7 @@ public class TelaMenu extends JFrame {
     }
 
     private JButton criarBotaoSair() {
-        JButton btn = new JButton("🚪  Sair");
+        JButton btn = new JButton("🚪  " + Mensagens.get("menu.sair"));
         btn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         btn.setForeground(new Color(220, 100, 100));
         btn.setBackground(new Color(36, 50, 70));
@@ -257,10 +290,10 @@ public class TelaMenu extends JFrame {
                         .filter(r -> r.getStatus() == br.pucgoias.biblioteca.model.Reserva.Status.ABERTA)
                         .toList().size();
 
-                statLivros.setText("📚  Livros: " + totalLivros);
-                statLeitores.setText("👥  Leitores: " + totalLeitores);
-                statEmprestimos.setText("📋  Empréstimos ativos: " + totalEmprestimos);
-                statReservas.setText("🔖  Reservas abertas: " + totalReservas);
+                statLivros.setText("📚  " + Mensagens.get("stat.livros") + " " + totalLivros);
+                statLeitores.setText("👥  " + Mensagens.get("stat.leitores") + " " + totalLeitores);
+                statEmprestimos.setText("📋  " + Mensagens.get("stat.emprestimos") + " " + totalEmprestimos);
+                statReservas.setText("🔖  " + Mensagens.get("stat.reservas") + " " + totalReservas);
 
             } catch (BancoDadosException e) {
                 // Silencioso — stats não críticas
@@ -281,7 +314,6 @@ public class TelaMenu extends JFrame {
         }
         desktopPane.add(frame);
         frame.setVisible(true);
-        // Atualiza stats ao abrir qualquer janela
         atualizarEstatisticas();
     }
 
