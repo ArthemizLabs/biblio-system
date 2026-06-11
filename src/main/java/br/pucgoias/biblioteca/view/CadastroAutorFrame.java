@@ -2,53 +2,29 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.controller.AutorController;
 import br.pucgoias.biblioteca.model.Autor;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener {
+public class CadastroAutorFrame extends GenericFrame {
 
     private final AutorController controller = new AutorController();
 
-    private JTextField campoId;
     private JTextField campoNome;
     private JTextField campoNacionalidade;
-
-    private JTextField campoPesquisa;
-    private JTable tabela;
-    private DefaultTableModel modeloTabela;
-
-    private JTabbedPane abas;
     private JLabel labelCodigo, labelNome, labelNacionalidade, labelPesquisaNome;
 
     public CadastroAutorFrame() {
-        inicializarComponentes();
-        configurarJanela();
-        Mensagens.addIdiomaListener(this);
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroAutorFrame.this);
-            }
-        });
+        configurarJanela(Mensagens.get("menu.autores"), 550, 420, 30, 30);
     }
 
-    private void inicializarComponentes() {
-        abas = new JTabbedPane();
-        abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
-        abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
-        add(abas);
-    }
-
-    private JPanel criarPainelCadastro() {
+    @Override
+    protected JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -82,8 +58,7 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
         JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar = criarBotao(Mensagens.get("btn.limpar"), new Color(127, 140, 141));
-
+        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnAlterar);
         painelBotoes.add(btnExcluir);
@@ -102,7 +77,8 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
         return painel;
     }
 
-    private JPanel criarPainelPesquisa() {
+    @Override
+    protected JPanel criarPainelPesquisa() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -137,10 +113,8 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
     }
 
     @Override
-    public void onIdiomaChanged() {
+    protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.autores"));
-        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
-        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
         labelCodigo.setText(Mensagens.get("label.codigo"));
         labelNome.setText(Mensagens.get("label.nome"));
         labelNacionalidade.setText(Mensagens.get("label.nacionalidade"));
@@ -150,59 +124,52 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
         });
     }
 
-    private void salvar() {
+    @Override
+    protected void salvar() {
         try {
-            Autor autor = new Autor(0, campoNome.getText(), campoNacionalidade.getText());
-            controller.salvar(autor);
+            controller.salvar(new Autor(0, campoNome.getText(), campoNacionalidade.getText()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
-            limparCampos();
-            pesquisar();
+            limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
         }
     }
 
-    private void alterar() {
+    @Override
+    protected void alterar() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
-            Autor autor = new Autor(
-                    Integer.parseInt(campoId.getText()),
-                    campoNome.getText(),
-                    campoNacionalidade.getText()
-            );
-            controller.atualizar(autor);
+            controller.atualizar(new Autor(Integer.parseInt(campoId.getText()), campoNome.getText(), campoNacionalidade.getText()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
-            limparCampos();
-            pesquisar();
+            limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
         }
     }
 
-    private void excluir() {
+    @Override
+    protected void excluir() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        int confirma = JOptionPane.showConfirmDialog(this,
-                Mensagens.get("msg.confirmar.excluir"), "Confirmar",
-                JOptionPane.YES_NO_OPTION);
-        if (confirma == JOptionPane.YES_OPTION) {
+        if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
+                "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
             try {
                 controller.deletar(Integer.parseInt(campoId.getText()));
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
-                limparCampos();
-                pesquisar();
+                limparCampos(); pesquisar();
             } catch (BancoDadosException e) {
                 JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    private void pesquisar() {
+    @Override
+    protected void pesquisar() {
         List<Autor> lista = controller.buscarPorNome(campoPesquisa.getText());
         modeloTabela.setRowCount(0);
         if (lista.isEmpty()) {
@@ -214,7 +181,8 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
         }
     }
 
-    private void carregarDaTabela() {
+    @Override
+    protected void carregarDaTabela() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) return;
         campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
@@ -224,30 +192,9 @@ public class CadastroAutorFrame extends JInternalFrame implements IdiomaListener
         abas.setSelectedIndex(0);
     }
 
-    private void limparCampos() {
-        campoId.setText("");
-        campoNome.setText("");
-        campoNacionalidade.setText("");
+    @Override
+    protected void limparCampos() {
+        campoId.setText(""); campoNome.setText(""); campoNacionalidade.setText("");
         campoNome.requestFocus();
-    }
-
-    private JButton criarBotao(String texto, Color cor) {
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setBackground(cor);
-        btn.setForeground(Color.BLACK);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private void configurarJanela() {
-        setTitle(Mensagens.get("menu.autores"));
-        setSize(550, 420);
-        setClosable(true);
-        setMaximizable(true);
-        setIconifiable(true);
-        setResizable(true);
-        setLocation(30, 30);
     }
 }

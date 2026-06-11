@@ -5,14 +5,11 @@ import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.controller.EditoraController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
@@ -21,48 +18,29 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener {
+public class CadastroLivroFrame extends GenericFrame {
 
     private final LivroController livroController         = new LivroController();
     private final AutorController autorController         = new AutorController();
     private final EditoraController editoraController     = new EditoraController();
     private final CategoriaController categoriaController = new CategoriaController();
 
-    private JTextField campoId, campoTitulo, campoIsbn, campoAno, campoQtd;
+    private JTextField campoTitulo, campoIsbn, campoAno, campoQtd;
     private JComboBox<Autor>     comboAutor;
     private JComboBox<Editora>   comboEditora;
     private JComboBox<Categoria> comboCategoria;
+    private JComboBox<String>    comboFiltro;
 
-    private JComboBox<String> comboFiltro;
-    private JTextField campoPesquisa;
-    private JTable tabela;
-    private DefaultTableModel modeloTabela;
-
-    private JTabbedPane abas;
     private JLabel labelCodigo, labelTitulo, labelIsbn, labelAno, labelQtd;
     private JLabel labelAutor, labelEditora, labelCategoria, labelPesquisarPor;
 
     public CadastroLivroFrame() {
-        inicializarComponentes();
-        configurarJanela();
+        configurarJanela(Mensagens.get("menu.livros"), 700, 580, 20, 20);
         carregarCombos();
-        Mensagens.addIdiomaListener(this);
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroLivroFrame.this);
-            }
-        });
     }
 
-    private void inicializarComponentes() {
-        abas = new JTabbedPane();
-        abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
-        abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
-        add(abas);
-    }
-
-    private JPanel criarPainelCadastro() {
+    @Override
+    protected JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -129,7 +107,7 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
         JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar = criarBotao(Mensagens.get("btn.limpar"), new Color(127, 140, 141));
+        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnAlterar);
         painelBotoes.add(btnExcluir);
@@ -148,7 +126,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         return painel;
     }
 
-    private JPanel criarPainelPesquisa() {
+    @Override
+    protected JPanel criarPainelPesquisa() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -211,10 +190,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
     }
 
     @Override
-    public void onIdiomaChanged() {
+    protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.livros"));
-        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
-        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
         labelCodigo.setText(Mensagens.get("label.codigo"));
         labelTitulo.setText(Mensagens.get("label.titulo"));
         labelIsbn.setText(Mensagens.get("label.isbn"));
@@ -237,10 +214,10 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         });
     }
 
-    private void salvar() {
+    @Override
+    protected void salvar() {
         try {
-            Livro livro = montarLivro();
-            livroController.salvar(livro);
+            livroController.salvar(montarLivro());
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
@@ -248,7 +225,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         }
     }
 
-    private void alterar() {
+    @Override
+    protected void alterar() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
@@ -264,7 +242,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         }
     }
 
-    private void excluir() {
+    @Override
+    protected void excluir() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
@@ -281,7 +260,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         }
     }
 
-    private void pesquisar() {
+    @Override
+    protected void pesquisar() {
         modeloTabela.setRowCount(0);
         List<Livro> lista;
         String texto = campoPesquisa.getText().trim();
@@ -289,19 +269,13 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
 
         try {
             if (filtro == 1) {
-                if (texto.isEmpty()) {
-                    lista = livroController.listarTodos();
-                } else {
-                    Livro l = livroController.buscarPorId(Integer.parseInt(texto));
-                    lista = l != null ? List.of(l) : List.of();
-                }
+                lista = texto.isEmpty() ? livroController.listarTodos()
+                        : (livroController.buscarPorId(Integer.parseInt(texto)) != null
+                           ? List.of(livroController.buscarPorId(Integer.parseInt(texto))) : List.of());
             } else if (filtro == 2) {
-                if (texto.isEmpty()) {
-                    lista = livroController.listarTodos();
-                } else {
-                    Livro l = livroController.buscarPorIsbn(texto);
-                    lista = l != null ? List.of(l) : List.of();
-                }
+                lista = texto.isEmpty() ? livroController.listarTodos()
+                        : (livroController.buscarPorIsbn(texto) != null
+                           ? List.of(livroController.buscarPorIsbn(texto)) : List.of());
             } else {
                 lista = livroController.buscarPorTitulo(texto);
             }
@@ -316,15 +290,15 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         }
         for (Livro l : lista) {
             modeloTabela.addRow(new Object[]{
-                    l.getId(), l.getTitulo(), l.getIsbn(), l.getAnoPublicacao(),
-                    l.getQuantidade(),
-                    l.getAutor() != null ? l.getAutor().getNome() : "",
-                    l.getCategoria() != null ? l.getCategoria().getNome() : ""
+                l.getId(), l.getTitulo(), l.getIsbn(), l.getAnoPublicacao(), l.getQuantidade(),
+                l.getAutor() != null ? l.getAutor().getNome() : "",
+                l.getCategoria() != null ? l.getCategoria().getNome() : ""
             });
         }
     }
 
-    private void carregarDaTabela() {
+    @Override
+    protected void carregarDaTabela() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) return;
 
@@ -345,9 +319,10 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
         abas.setSelectedIndex(0);
     }
 
-    private void limparCampos() {
-        campoId.setText(""); campoTitulo.setText("");
-        campoIsbn.setText(""); campoAno.setText(""); campoQtd.setText("");
+    @Override
+    protected void limparCampos() {
+        campoId.setText(""); campoTitulo.setText(""); campoIsbn.setText("");
+        campoAno.setText(""); campoQtd.setText("");
         if (comboAutor.getItemCount()    > 0) comboAutor.setSelectedIndex(0);
         if (comboEditora.getItemCount()  > 0) comboEditora.setSelectedIndex(0);
         if (comboCategoria.getItemCount()> 0) comboCategoria.setSelectedIndex(0);
@@ -377,8 +352,7 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
             comboCategoria.removeAllItems();
             categoriaController.listarTodos().forEach(comboCategoria::addItem);
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -396,13 +370,11 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
     private void aplicarFiltroNumerico(JTextField campo) {
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
-            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
-                    throws BadLocationException {
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException {
                 if (text.matches("\\d+")) super.insertString(fb, offset, text, attr);
             }
             @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr)
-                    throws BadLocationException {
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr) throws BadLocationException {
                 if (text == null || text.matches("\\d*")) super.replace(fb, offset, length, text, attr);
             }
         });
@@ -411,37 +383,17 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
     private void aplicarFiltroAno(JTextField campo) {
         ((AbstractDocument) campo.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
-            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr)
-                    throws BadLocationException {
+            public void insertString(FilterBypass fb, int offset, String text, AttributeSet attr) throws BadLocationException {
                 String atual = fb.getDocument().getText(0, fb.getDocument().getLength());
                 if (text.matches("\\d+") && (atual + text).length() <= 4)
                     super.insertString(fb, offset, text, attr);
             }
             @Override
-            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr)
-                    throws BadLocationException {
+            public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attr) throws BadLocationException {
                 String atual = fb.getDocument().getText(0, fb.getDocument().getLength());
                 String resultado = atual.substring(0, offset) + (text != null ? text : "") + atual.substring(offset + length);
                 if (resultado.matches("\\d{0,4}")) super.replace(fb, offset, length, text, attr);
             }
         });
-    }
-
-    private JButton criarBotao(String texto, Color cor) {
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setBackground(cor);
-        btn.setForeground(Color.BLACK);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private void configurarJanela() {
-        setTitle(Mensagens.get("menu.livros"));
-        setSize(700, 580);
-        setClosable(true); setMaximizable(true);
-        setIconifiable(true); setResizable(true);
-        setLocation(20, 20);
     }
 }

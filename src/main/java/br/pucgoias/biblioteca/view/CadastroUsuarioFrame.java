@@ -2,53 +2,30 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.controller.UsuarioController;
 import br.pucgoias.biblioteca.model.Usuario;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListener {
+public class CadastroUsuarioFrame extends GenericFrame {
 
     private final UsuarioController controller = new UsuarioController();
 
-    private JTextField campoId, campoLogin;
+    private JTextField campoLogin;
     private JPasswordField campoSenha;
     private JComboBox<String> comboPerfil;
-
-    private JTextField campoPesquisa;
-    private JTable tabela;
-    private DefaultTableModel modeloTabela;
-
-    private JTabbedPane abas;
     private JLabel labelCodigo, labelLogin, labelSenha, labelPerfil, labelPesquisaLogin;
 
     public CadastroUsuarioFrame() {
-        inicializarComponentes();
-        configurarJanela();
-        Mensagens.addIdiomaListener(this);
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroUsuarioFrame.this);
-            }
-        });
+        configurarJanela(Mensagens.get("menu.usuarios"), 560, 460, 150, 60);
     }
 
-    private void inicializarComponentes() {
-        abas = new JTabbedPane();
-        abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
-        abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
-        add(abas);
-    }
-
-    private JPanel criarPainelCadastro() {
+    @Override
+    protected JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -86,7 +63,7 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
         JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar = criarBotao(Mensagens.get("btn.limpar"), new Color(127, 140, 141));
+        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnAlterar);
         painelBotoes.add(btnExcluir);
@@ -105,7 +82,8 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         return painel;
     }
 
-    private JPanel criarPainelPesquisa() {
+    @Override
+    protected JPanel criarPainelPesquisa() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -140,10 +118,8 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
     }
 
     @Override
-    public void onIdiomaChanged() {
+    protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.usuarios"));
-        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
-        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
         labelCodigo.setText(Mensagens.get("label.codigo"));
         labelLogin.setText(Mensagens.get("label.login"));
         labelSenha.setText(Mensagens.get("label.senha"));
@@ -154,13 +130,10 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         });
     }
 
-    private void salvar() {
+    @Override
+    protected void salvar() {
         try {
-            Usuario usuario = new Usuario(0,
-                    campoLogin.getText(),
-                    new String(campoSenha.getPassword()),
-                    perfilSelecionado());
-            controller.salvar(usuario);
+            controller.salvar(new Usuario(0, campoLogin.getText(), new String(campoSenha.getPassword()), perfilSelecionado()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
@@ -168,18 +141,15 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         }
     }
 
-    private void alterar() {
+    @Override
+    protected void alterar() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
-            Usuario usuario = new Usuario(
-                    Integer.parseInt(campoId.getText()),
-                    campoLogin.getText(),
-                    new String(campoSenha.getPassword()),
-                    perfilSelecionado());
-            controller.atualizar(usuario);
+            controller.atualizar(new Usuario(Integer.parseInt(campoId.getText()),
+                    campoLogin.getText(), new String(campoSenha.getPassword()), perfilSelecionado()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
@@ -187,7 +157,8 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         }
     }
 
-    private void excluir() {
+    @Override
+    protected void excluir() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
@@ -204,7 +175,8 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         }
     }
 
-    private void pesquisar() {
+    @Override
+    protected void pesquisar() {
         try {
             List<Usuario> lista = controller.listarTodos();
             modeloTabela.setRowCount(0);
@@ -219,12 +191,12 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao pesquisar: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Erro ao pesquisar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void carregarDaTabela() {
+    @Override
+    protected void carregarDaTabela() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) return;
         campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
@@ -234,9 +206,9 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         abas.setSelectedIndex(0);
     }
 
-    private void limparCampos() {
-        campoId.setText(""); campoLogin.setText("");
-        campoSenha.setText("");
+    @Override
+    protected void limparCampos() {
+        campoId.setText(""); campoLogin.setText(""); campoSenha.setText("");
         comboPerfil.setSelectedIndex(0);
         campoLogin.requestFocus();
     }
@@ -245,23 +217,5 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         return "FUNCIONÁRIO".equals(comboPerfil.getSelectedItem())
                 ? Usuario.Perfil.FUNCIONARIO
                 : Usuario.Perfil.ADMIN;
-    }
-
-    private JButton criarBotao(String texto, Color cor) {
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setBackground(cor);
-        btn.setForeground(Color.BLACK);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private void configurarJanela() {
-        setTitle(Mensagens.get("menu.usuarios"));
-        setSize(560, 460);
-        setClosable(true); setMaximizable(true);
-        setIconifiable(true); setResizable(true);
-        setLocation(150, 60);
     }
 }

@@ -2,50 +2,29 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.model.Categoria;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaListener {
+public class CadastroCategoriaFrame extends GenericFrame {
 
     private final CategoriaController controller = new CategoriaController();
 
-    private JTextField campoId, campoNome;
+    private JTextField campoNome;
     private JTextArea campoDescricao;
-    private JTable tabela;
-    private DefaultTableModel modeloTabela;
-
-    private JTabbedPane abas;
     private JLabel labelCodigo, labelNome, labelDescricao, labelPesquisaNome;
 
     public CadastroCategoriaFrame() {
-        inicializarComponentes();
-        configurarJanela();
-        Mensagens.addIdiomaListener(this);
-        addInternalFrameListener(new InternalFrameAdapter() {
-            @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroCategoriaFrame.this);
-            }
-        });
+        configurarJanela(Mensagens.get("menu.categorias"), 550, 450, 90, 90);
     }
 
-    private void inicializarComponentes() {
-        abas = new JTabbedPane();
-        abas.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        abas.addTab(Mensagens.get("aba.cadastro"), criarPainelCadastro());
-        abas.addTab(Mensagens.get("aba.pesquisa"), criarPainelPesquisa());
-        add(abas);
-    }
-
-    private JPanel criarPainelCadastro() {
+    @Override
+    protected JPanel criarPainelCadastro() {
         JPanel painel = new JPanel(new GridBagLayout());
         painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
         GridBagConstraints gbc = new GridBagConstraints();
@@ -80,7 +59,7 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
         JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar = criarBotao(Mensagens.get("btn.limpar"), new Color(127, 140, 141));
+        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnAlterar);
         painelBotoes.add(btnExcluir);
@@ -100,14 +79,15 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         return painel;
     }
 
-    private JPanel criarPainelPesquisa() {
+    @Override
+    protected JPanel criarPainelPesquisa() {
         JPanel painel = new JPanel(new BorderLayout(10, 10));
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
         labelPesquisaNome = new JLabel(Mensagens.get("label.nome"));
         painelBusca.add(labelPesquisaNome);
-        JTextField campoPesquisa = new JTextField(20);
+        campoPesquisa = new JTextField(20);
         JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
         painelBusca.add(campoPesquisa);
         painelBusca.add(btnPesquisar);
@@ -135,10 +115,8 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
     }
 
     @Override
-    public void onIdiomaChanged() {
+    protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.categorias"));
-        abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
-        abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
         labelCodigo.setText(Mensagens.get("label.codigo"));
         labelNome.setText(Mensagens.get("label.nome"));
         labelDescricao.setText(Mensagens.get("label.descricao"));
@@ -148,7 +126,8 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         });
     }
 
-    private void salvar() {
+    @Override
+    protected void salvar() {
         try {
             controller.salvar(new Categoria(0, campoNome.getText(), campoDescricao.getText()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
@@ -158,15 +137,14 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         }
     }
 
-    private void alterar() {
+    @Override
+    protected void alterar() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
-            controller.atualizar(new Categoria(
-                    Integer.parseInt(campoId.getText()),
-                    campoNome.getText(), campoDescricao.getText()));
+            controller.atualizar(new Categoria(Integer.parseInt(campoId.getText()), campoNome.getText(), campoDescricao.getText()));
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
@@ -174,7 +152,8 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         }
     }
 
-    private void excluir() {
+    @Override
+    protected void excluir() {
         if (campoId.getText().isEmpty()) {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
@@ -191,7 +170,8 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         }
     }
 
-    private void pesquisar() {
+    @Override
+    protected void pesquisar() {
         List<Categoria> lista = controller.listarTodos();
         modeloTabela.setRowCount(0);
         if (lista.isEmpty()) {
@@ -203,7 +183,8 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         }
     }
 
-    private void carregarDaTabela() {
+    @Override
+    protected void carregarDaTabela() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) return;
         campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
@@ -213,26 +194,9 @@ public class CadastroCategoriaFrame extends JInternalFrame implements IdiomaList
         abas.setSelectedIndex(0);
     }
 
-    private void limparCampos() {
+    @Override
+    protected void limparCampos() {
         campoId.setText(""); campoNome.setText(""); campoDescricao.setText("");
         campoNome.requestFocus();
-    }
-
-    private JButton criarBotao(String texto, Color cor) {
-        JButton btn = new JButton(texto);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        btn.setBackground(cor);
-        btn.setForeground(Color.BLACK);
-        btn.setFocusPainted(false);
-        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        return btn;
-    }
-
-    private void configurarJanela() {
-        setTitle(Mensagens.get("menu.categorias"));
-        setSize(550, 450);
-        setClosable(true); setMaximizable(true);
-        setIconifiable(true); setResizable(true);
-        setLocation(90, 90);
     }
 }
