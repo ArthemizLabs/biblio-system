@@ -59,10 +59,12 @@ src/main/java/br/pucgoias/biblioteca/util/ConexaoBD.java
 Verifique (e ajuste se necessário) as constantes de conexão:
 
 ```java
-private static final String URL    = "jdbc:mysql://localhost:3306/bibliosystem?useSSL=false&serverTimezone=America/Sao_Paulo";
+private static final String URL = "jdbc:mysql://localhost:3306/bibliosystem?useSSL=false&serverTimezone=America/Sao_Paulo&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8&connectionCollation=utf8mb4_unicode_ci";
 private static final String USUARIO = "root";      // ← altere se necessário
 private static final String SENHA   = "root";      // ← altere se necessário
 ```
+
+> **Importante:** o parâmetro `connectionCollation=utf8mb4_unicode_ci` garante que a conexão use `utf8mb4` na negociação com o servidor MySQL, evitando corrupção de caracteres especiais (acentos, cedilhas) no armazenamento e na leitura dos dados.
 
 ### Opção B — Docker Compose (recomendado: zero configuração)
 
@@ -223,14 +225,15 @@ biblio-system/
 │   └── main/
 │       ├── java/br/pucgoias/biblioteca/
 │       │   ├── controller/           ← Regras de negócio e validações
-│       │   ├── dao/                  ← Acesso a dados via JDBC (+ dao/interfaces)
+│       │   ├── dao/                  ← Acesso a dados via JDBC
+│       │   │   └── interfaces/       ← Contratos DAO + IdiomaListener
 │       │   ├── model/                ← Entidades (ItemAcervo, Livro, Autor, Leitor...)
 │       │   ├── util/                 ← ConexaoBD, Mensagens (i18n), exceptions/
 │       │   └── view/                 ← Janelas Swing (JFrame, JInternalFrame)
 │       │   ├── App.java              ← Classe principal (inicializa o sistema)
 │       └── resources/
-│           └── messages_en.properties  ← Textos em Inglês
 │           ├── messages_pt.properties  ← Textos em Português
+│           └── messages_en.properties  ← Textos em Inglês
 ├── docker-compose.yml                ← Sobe o banco MySQL via Docker
 └── pom.xml                           ← Dependências Maven (MySQL Connector/J)
 ```
@@ -272,14 +275,14 @@ biblio-system/
 
 O BiblioSystem demonstra os **seis conceitos** cobrados na disciplina. O quadro a seguir resume **em quais classes cada conceito é aplicado**:
 
-| Conceito                   | Principais classes / arquivos                                                                                                                         | Como é aplicado                                                                                                                                                                             |
-|----------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **Abstração**              | `ItemAcervo` (abstract); `IGenericoDAO<T, ID>` e demais interfaces `I…DAO`                                                                            | Classe abstrata que não pode ser instanciada e define métodos abstratos; as interfaces expõem o contrato sem revelar a implementação.                                                       |
-| **Encapsulamento**         | `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `Emprestimo`, `Reserva`, `ItemAcervo`                                                  | Atributos `private` acessados somente por *getters/setters*; enums internos (`Perfil`, `Status`) protegem os estados válidos.                                                               |
-| **Herança**                | `Livro extends ItemAcervo`; `BancoDadosException`/`ValidacaoException extends RuntimeException`; telas `extends JFrame`/`JInternalFrame`              | `Livro` reaproveita atributos e comportamento de `ItemAcervo`; exceções e telas herdam de classes da plataforma Java/Swing.                                                                 |
-| **Polimorfismo**           | `toString()` em `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `ItemAcervo`; `getIdentificador()`/`getDescricaoCompleta()` em `Livro` | Sobrescrita (`@Override`): o Swing chama `toString()` em tempo de execução para exibir objetos em `JComboBox`/`JTable`; `Livro` reimplementa os métodos abstratos herdados de `ItemAcervo`. |
-| **Interface**              | `IGenericoDAO<T, ID>`, `ILivroDAO`, `IAutorDAO`, `IEditoraDAO`, `ICategoriaDAO`, `ILeitorDAO`, `IUsuarioDAO`, `IEmprestimoDAO`, `IReservaDAO`         | Interface genérica define o CRUD; cada interface especializa o contrato e é concretizada por um DAO (`AutorDAO implements IAutorDAO`, etc.).                                                |
-| **Tratamento de Exceções** | `BancoDadosException`, `ValidacaoException` (uso em DAO, Controller e View)                                                                           | Exceções customizadas: os DAOs capturam `SQLException` e relançam `BancoDadosException`; os Controllers lançam `ValidacaoException`; as Views tratam ambas com `try/catch`.                 |
+| Conceito                   | Principais classes / arquivos                                                                                                                                   | Como é aplicado                                                                                                                                                                                                              |
+|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Abstração**              | `ItemAcervo` (abstract); `IGenericoDAO<T, ID>` e demais interfaces `I…DAO`                                                                                      | Classe abstrata que não pode ser instanciada e define métodos abstratos; as interfaces expõem o contrato sem revelar a implementação.                                                                                        |
+| **Encapsulamento**         | `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `Emprestimo`, `Reserva`, `ItemAcervo`                                                            | Atributos `private` acessados somente por *getters/setters*; enums internos (`Perfil`, `Status`) protegem os estados válidos.                                                                                                |
+| **Herança**                | `Livro extends ItemAcervo`; `BancoDadosException`/`ValidacaoException extends RuntimeException`; telas `extends JFrame`/`JInternalFrame`                        | `Livro` reaproveita atributos e comportamento de `ItemAcervo`; exceções e telas herdam de classes da plataforma Java/Swing.                                                                                                  |
+| **Polimorfismo**           | `toString()` em `Livro`, `Autor`, `Editora`, `Categoria`, `Leitor`, `Usuario`, `ItemAcervo`; `getIdentificador()`/`getDescricaoCompleta()` em `Livro`           | Sobrescrita (`@Override`): o Swing chama `toString()` em tempo de execução para exibir objetos em `JComboBox`/`JTable`; `Livro` reimplementa os métodos abstratos herdados de `ItemAcervo`.                                  |
+| **Interface**              | `IGenericoDAO<T, ID>`, `ILivroDAO`, `IAutorDAO`, `IEditoraDAO`, `ICategoriaDAO`, `ILeitorDAO`, `IUsuarioDAO`, `IEmprestimoDAO`, `IReservaDAO`; `IdiomaListener` | Interface genérica define o CRUD; cada interface especializa o contrato e é concretizada por um DAO (`AutorDAO implements IAutorDAO`, etc.). `IdiomaListener` define o contrato de atualização dinâmica de idioma nas Views. |
+| **Tratamento de Exceções** | `BancoDadosException`, `ValidacaoException` (uso em DAO, Controller e View)                                                                                     | Exceções customizadas: os DAOs capturam `SQLException` e relançam `BancoDadosException`; os Controllers lançam `ValidacaoException`; as Views tratam ambas com `try/catch`.                                                  |
 
 **Destaque dos conceitos:**
 - **Herança** → `Livro` herda de `ItemAcervo`.
@@ -292,9 +295,23 @@ O BiblioSystem demonstra os **seis conceitos** cobrados na disciplina. O quadro 
 
 O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o idioma:
 
-1. No menu da aplicação, acesse **`Configurações`** → **`Idioma`**.
-2. Selecione o idioma desejado e confirme.
-3. Os textos da interface serão atualizados via `ResourceBundle`.
+1. No menu lateral, acesse **`SISTEMA`** → **`Idioma`**.
+2. Selecione o idioma desejado e clique em **`Confirmar`**.
+3. Todos os textos da interface são atualizados.
+
+**Implementação técnica:**
+
+- `Mensagens` (em `util/`) gerencia o `ResourceBundle` ativo e mantém uma lista de ouvintes.
+- `IdiomaListener` (em `dao/interfaces/`) é a interface com o método `onIdiomaChanged()`.
+- Todas as janelas (`TelaMenu`, `CadastroLivroFrame`, `EmprestimoFrame`, etc.) implementam `IdiomaListener` e se registram em `Mensagens` ao abrir, desregistrando-se ao fechar.
+- Ao chamar `Mensagens.setIdioma(locale)`, todos os ouvintes ativos são notificados e atualizam seus labels, abas, botões e cabeçalhos de tabela no mesmo ciclo de evento.
+
+**Arquivos de tradução** (`src/main/resources/`):
+
+| Arquivo                   | Idioma              |
+|---------------------------|---------------------|
+| `messages_pt.properties`  | Português (PT-BR)   |
+| `messages_en.properties`  | Inglês (EN-US)      |
 
 ---
 
@@ -311,15 +328,16 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 
 ## Solução de Problemas Comuns
 
-| Problema                                           | Solução                                                                                                                                                                      |
-|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | Execute `Maven → Update Project` para baixar o connector.                                                                                                                    |
-| `Access denied for user 'root'@'localhost'`        | Verifique usuário/senha em `ConexaoBD.java`.                                                                                                                                 |
-| `Unknown database 'bibliosystem'`                  | Execute o script `bibliosystem.sql` antes de rodar o sistema.                                                                                                                |
-| Erros vermelhos após importação                    | Botão direito no projeto → `Maven` → `Update Project` → marque `Force Update` → `OK`.                                                                                        |
-| Interface em branco / não abre                     | Confirme que está executando `App.java` como **Java Application**, não como Applet.                                                                                          |
-| Container Docker não sobe (`port already in use`)  | Outro processo usa a porta 3306 (provavelmente MySQL local). Pare o MySQL local ou mude a porta no `docker-compose.yml`: `"3307:3306"` e atualize a URL em `ConexaoBD.java`. |
-| `bibliosystem-db` sobe mas banco não existe        | O script SQL ainda está sendo executado. Aguarde 20–30 segundos e tente novamente.                                                                                           |
+| Problema                                           | Solução                                                                                                                                                                                                                                                                                |
+|----------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | Execute `Maven → Update Project` para baixar o connector.                                                                                                                                                                                                                              |
+| `Access denied for user 'root'@'localhost'`        | Verifique usuário/senha em `ConexaoBD.java`.                                                                                                                                                                                                                                           |
+| `Unknown database 'bibliosystem'`                  | Execute o script `bibliosystem.sql` antes de rodar o sistema.                                                                                                                                                                                                                          |
+| Erros vermelhos após importação                    | Botão direito no projeto → `Maven` → `Update Project` → marque `Force Update` → `OK`.                                                                                                                                                                                                  |
+| Interface em branco / não abre                     | Confirme que está executando `App.java` como **Java Application**, não como Applet.                                                                                                                                                                                                    |
+| Container Docker não sobe (`port already in use`)  | Outro processo usa a porta 3306 (provavelmente MySQL local). Pare o MySQL local ou mude a porta no `docker-compose.yml`: `"3307:3306"` e atualize a URL em `ConexaoBD.java`.                                                                                                           |
+| `bibliosystem-db` sobe mas banco não existe        | O script SQL ainda está sendo executado. Aguarde 20–30 segundos e tente novamente.                                                                                                                                                                                                     |
+| Caracteres especiais corrompidos (ex: `CiÃªncias`) | O banco foi populado com charset errado. Conecte ao MySQL com `--default-character-set=utf8mb4`, corrija os registros via `UPDATE` ou recadastre-os pelo sistema. A URL em `ConexaoBD.java` já inclui `connectionCollation=utf8mb4_unicode_ci`, que previne o problema em novos dados. |
 
 ---
 
