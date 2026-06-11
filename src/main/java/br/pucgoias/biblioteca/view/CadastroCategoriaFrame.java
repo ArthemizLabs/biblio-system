@@ -2,7 +2,7 @@ package br.pucgoias.biblioteca.view;
 
 import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.model.Categoria;
-import br.pucgoias.biblioteca.util.IdiomaListener;
+import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;

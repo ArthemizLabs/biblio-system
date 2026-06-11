@@ -1,5 +1,7 @@
 package br.pucgoias.biblioteca.util;
 
+import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
