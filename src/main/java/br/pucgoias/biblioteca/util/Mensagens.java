@@ -1,6 +1,6 @@
 package br.pucgoias.biblioteca.util;
 
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
+import br.pucgoias.biblioteca.view.interfaces.IdiomaListener;
 
 import java.util.ArrayList;
 import java.util.List;

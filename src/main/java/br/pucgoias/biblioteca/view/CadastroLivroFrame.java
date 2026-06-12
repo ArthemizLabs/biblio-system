@@ -5,7 +5,7 @@ import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.controller.EditoraController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
+import br.pucgoias.biblioteca.view.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;

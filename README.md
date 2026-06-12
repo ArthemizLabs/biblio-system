@@ -226,10 +226,11 @@ biblio-system/
 │       ├── java/br/pucgoias/biblioteca/
 │       │   ├── controller/           ← Regras de negócio e validações
 │       │   ├── dao/                  ← Acesso a dados via JDBC
-│       │   │   └── interfaces/       ← Contratos DAO + IdiomaListener
+│       │   │   └── interfaces/       ← Contratos DAO
 │       │   ├── model/                ← Entidades (ItemAcervo, Livro, Autor, Leitor...)
 │       │   ├── util/                 ← ConexaoBD, Mensagens (i18n), exceptions/
 │       │   └── view/                 ← Janelas Swing (JFrame, JInternalFrame)
+│       │   │   └── interfaces/       ← IdiomaListener (i18n)
 │       │   ├── App.java              ← Classe principal (inicializa o sistema)
 │       └── resources/
 │           ├── messages_pt.properties  ← Textos em Português
@@ -302,7 +303,7 @@ O sistema suporta **Português (PT-BR)** e **Inglês (EN-US)**. Para trocar o id
 **Implementação técnica:**
 
 - `Mensagens` (em `util/`) gerencia o `ResourceBundle` ativo e mantém uma lista de ouvintes.
-- `IdiomaListener` (em `dao/interfaces/`) é a interface com o método `onIdiomaChanged()`.
+- `IdiomaListener` (em `view/interfaces/`) é a interface com o método `onIdiomaChanged()`.
 - Todas as janelas (`TelaMenu`, `CadastroLivroFrame`, `EmprestimoFrame`, etc.) implementam `IdiomaListener` e se registram em `Mensagens` ao abrir, desregistrando-se ao fechar.
 - Ao chamar `Mensagens.setIdioma(locale)`, todos os ouvintes ativos são notificados e atualizam seus labels, abas, botões e cabeçalhos de tabela no mesmo ciclo de evento.
 
