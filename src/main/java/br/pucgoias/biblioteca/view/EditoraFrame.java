@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroEditoraFrame extends JInternalFrame implements IdiomaListener {
+public class EditoraFrame extends JInternalFrame implements IdiomaListener {
 
     private final EditoraController controller = new EditoraController();
 
@@ -26,13 +26,13 @@ public class CadastroEditoraFrame extends JInternalFrame implements IdiomaListen
     private JTabbedPane abas;
     private JLabel labelCodigo, labelNome, labelCidade, labelPesquisaNome;
 
-    public CadastroEditoraFrame() {
+    public EditoraFrame() {
         inicializarComponentes();
         configurarJanela();
         Mensagens.addIdiomaListener(this);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroEditoraFrame.this);
+                Mensagens.removeIdiomaListener(EditoraFrame.this);
             }
         });
     }
@@ -149,13 +149,13 @@ public class CadastroEditoraFrame extends JInternalFrame implements IdiomaListen
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void alterar() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -163,13 +163,13 @@ public class CadastroEditoraFrame extends JInternalFrame implements IdiomaListen
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void excluir() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
@@ -179,7 +179,7 @@ public class CadastroEditoraFrame extends JInternalFrame implements IdiomaListen
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
                 limparCampos(); pesquisar();
             } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }

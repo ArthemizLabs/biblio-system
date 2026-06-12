@@ -21,7 +21,7 @@ import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener {
+public class LivroFrame extends JInternalFrame implements IdiomaListener {
 
     private final LivroController livroController         = new LivroController();
     private final AutorController autorController         = new AutorController();
@@ -42,14 +42,14 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
     private JLabel labelCodigo, labelTitulo, labelIsbn, labelAno, labelQtd;
     private JLabel labelAutor, labelEditora, labelCategoria, labelPesquisarPor;
 
-    public CadastroLivroFrame() {
+    public LivroFrame() {
         inicializarComponentes();
         configurarJanela();
         carregarCombos();
         Mensagens.addIdiomaListener(this);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroLivroFrame.this);
+                Mensagens.removeIdiomaListener(LivroFrame.this);
             }
         });
     }
@@ -244,13 +244,13 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void alterar() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -260,13 +260,13 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void excluir() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
@@ -276,7 +276,7 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
                 limparCampos(); pesquisar();
             } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -306,7 +306,7 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
                 lista = livroController.buscarPorTitulo(texto);
             }
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -377,8 +377,8 @@ public class CadastroLivroFrame extends JInternalFrame implements IdiomaListener
             comboCategoria.removeAllItems();
             categoriaController.listarTodos().forEach(comboCategoria::addItem);
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.dados ") + e.getMessage(),
+                    Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 

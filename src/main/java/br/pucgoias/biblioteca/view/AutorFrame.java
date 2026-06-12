@@ -1,7 +1,7 @@
 package br.pucgoias.biblioteca.view;
 
-import br.pucgoias.biblioteca.controller.UsuarioController;
-import br.pucgoias.biblioteca.model.Usuario;
+import br.pucgoias.biblioteca.controller.AutorController;
+import br.pucgoias.biblioteca.model.Autor;
 import br.pucgoias.biblioteca.view.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
@@ -14,28 +14,28 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListener {
+public class AutorFrame extends JInternalFrame implements IdiomaListener {
 
-    private final UsuarioController controller = new UsuarioController();
+    private final AutorController controller = new AutorController();
 
-    private JTextField campoId, campoLogin;
-    private JPasswordField campoSenha;
-    private JComboBox<String> comboPerfil;
+    private JTextField campoId;
+    private JTextField campoNome;
+    private JTextField campoNacionalidade;
 
     private JTextField campoPesquisa;
     private JTable tabela;
     private DefaultTableModel modeloTabela;
 
     private JTabbedPane abas;
-    private JLabel labelCodigo, labelLogin, labelSenha, labelPerfil, labelPesquisaLogin;
+    private JLabel labelCodigo, labelNome, labelNacionalidade, labelPesquisaNome;
 
-    public CadastroUsuarioFrame() {
+    public AutorFrame() {
         inicializarComponentes();
         configurarJanela();
         Mensagens.addIdiomaListener(this);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroUsuarioFrame.this);
+                Mensagens.removeIdiomaListener(AutorFrame.this);
             }
         });
     }
@@ -61,38 +61,35 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         campoId = new JTextField(8);
         campoId.setEditable(false);
         campoId.setBackground(new Color(230, 230, 230));
-        gbc.gridx = 1; painel.add(campoId, gbc);
+        gbc.gridx = 1;
+        painel.add(campoId, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1;
-        labelLogin = new JLabel(Mensagens.get("label.login"));
-        painel.add(labelLogin, gbc);
-        campoLogin = new JTextField(25);
-        gbc.gridx = 1; painel.add(campoLogin, gbc);
+        labelNome = new JLabel(Mensagens.get("label.nome"));
+        painel.add(labelNome, gbc);
+        campoNome = new JTextField(25);
+        gbc.gridx = 1;
+        painel.add(campoNome, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2;
-        labelSenha = new JLabel(Mensagens.get("label.senha"));
-        painel.add(labelSenha, gbc);
-        campoSenha = new JPasswordField(25);
-        gbc.gridx = 1; painel.add(campoSenha, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3;
-        labelPerfil = new JLabel(Mensagens.get("label.perfil"));
-        painel.add(labelPerfil, gbc);
-        comboPerfil = new JComboBox<>(new String[]{"ADMIN", "FUNCIONÁRIO"});
-        comboPerfil.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        gbc.gridx = 1; painel.add(comboPerfil, gbc);
+        labelNacionalidade = new JLabel(Mensagens.get("label.nacionalidade"));
+        painel.add(labelNacionalidade, gbc);
+        campoNacionalidade = new JTextField(25);
+        gbc.gridx = 1;
+        painel.add(campoNacionalidade, gbc);
 
         JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
         JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
         JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
         JButton btnLimpar = criarBotao(Mensagens.get("btn.limpar"), new Color(127, 140, 141));
+
         painelBotoes.add(btnSalvar);
         painelBotoes.add(btnAlterar);
         painelBotoes.add(btnExcluir);
         painelBotoes.add(btnLimpar);
 
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0; gbc.gridy = 3;
         gbc.gridwidth = 2;
         gbc.insets = new Insets(20, 6, 6, 6);
         painel.add(painelBotoes, gbc);
@@ -110,15 +107,15 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        labelPesquisaLogin = new JLabel(Mensagens.get("label.login"));
-        painelBusca.add(labelPesquisaLogin);
+        labelPesquisaNome = new JLabel(Mensagens.get("label.nome"));
+        painelBusca.add(labelPesquisaNome);
         campoPesquisa = new JTextField(20);
         JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
         painelBusca.add(campoPesquisa);
         painelBusca.add(btnPesquisar);
 
         modeloTabela = new DefaultTableModel(
-                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.login"), Mensagens.get("col.perfil")}, 0) {
+                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.nacionalidade")}, 0) {
             @Override public boolean isCellEditable(int r, int c) { return false; }
         };
         tabela = new JTable(modeloTabela);
@@ -141,86 +138,79 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
 
     @Override
     public void onIdiomaChanged() {
-        setTitle(Mensagens.get("menu.usuarios"));
+        setTitle(Mensagens.get("menu.autores"));
         abas.setTitleAt(0, Mensagens.get("aba.cadastro"));
         abas.setTitleAt(1, Mensagens.get("aba.pesquisa"));
         labelCodigo.setText(Mensagens.get("label.codigo"));
-        labelLogin.setText(Mensagens.get("label.login"));
-        labelSenha.setText(Mensagens.get("label.senha"));
-        labelPerfil.setText(Mensagens.get("label.perfil"));
-        labelPesquisaLogin.setText(Mensagens.get("label.login"));
+        labelNome.setText(Mensagens.get("label.nome"));
+        labelNacionalidade.setText(Mensagens.get("label.nacionalidade"));
+        labelPesquisaNome.setText(Mensagens.get("label.nome"));
         modeloTabela.setColumnIdentifiers(new String[]{
-            Mensagens.get("col.codigo"), Mensagens.get("col.login"), Mensagens.get("col.perfil")
+            Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.nacionalidade")
         });
     }
 
     private void salvar() {
         try {
-            Usuario usuario = new Usuario(0,
-                    campoLogin.getText(),
-                    new String(campoSenha.getPassword()),
-                    perfilSelecionado());
-            controller.salvar(usuario);
+            Autor autor = new Autor(0, campoNome.getText(), campoNacionalidade.getText());
+            controller.salvar(autor);
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
-            limparCampos(); pesquisar();
+            limparCampos();
+            pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void alterar() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
-            Usuario usuario = new Usuario(
+            Autor autor = new Autor(
                     Integer.parseInt(campoId.getText()),
-                    campoLogin.getText(),
-                    new String(campoSenha.getPassword()),
-                    perfilSelecionado());
-            controller.atualizar(usuario);
+                    campoNome.getText(),
+                    campoNacionalidade.getText()
+            );
+            controller.atualizar(autor);
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
-            limparCampos(); pesquisar();
+            limparCampos();
+            pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void excluir() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
-                "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+        int confirma = JOptionPane.showConfirmDialog(this,
+                Mensagens.get("msg.confirmar.excluir"), "Confirmar",
+                JOptionPane.YES_NO_OPTION);
+        if (confirma == JOptionPane.YES_OPTION) {
             try {
                 controller.deletar(Integer.parseInt(campoId.getText()));
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
-                limparCampos(); pesquisar();
+                limparCampos();
+                pesquisar();
             } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
     private void pesquisar() {
-        try {
-            List<Usuario> lista = controller.listarTodos();
-            modeloTabela.setRowCount(0);
-            String filtro = campoPesquisa.getText().trim().toLowerCase();
-            for (Usuario u : lista) {
-                if (filtro.isEmpty() || u.getLogin().toLowerCase().contains(filtro)) {
-                    String display = u.getPerfil() == Usuario.Perfil.FUNCIONARIO ? "FUNCIONÁRIO" : u.getPerfil().name();
-                    modeloTabela.addRow(new Object[]{u.getId(), u.getLogin(), display});
-                }
-            }
-            if (modeloTabela.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao pesquisar: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+        List<Autor> lista = controller.buscarPorNome(campoPesquisa.getText());
+        modeloTabela.setRowCount(0);
+        if (lista.isEmpty()) {
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
+            return;
+        }
+        for (Autor a : lista) {
+            modeloTabela.addRow(new Object[]{a.getId(), a.getNome(), a.getNacionalidade()});
         }
     }
 
@@ -228,23 +218,17 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
         int linha = tabela.getSelectedRow();
         if (linha < 0) return;
         campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
-        campoLogin.setText(modeloTabela.getValueAt(linha, 1).toString());
-        campoSenha.setText("");
-        comboPerfil.setSelectedItem(modeloTabela.getValueAt(linha, 2).toString());
+        campoNome.setText(modeloTabela.getValueAt(linha, 1).toString());
+        Object nac = modeloTabela.getValueAt(linha, 2);
+        campoNacionalidade.setText(nac != null ? nac.toString() : "");
         abas.setSelectedIndex(0);
     }
 
     private void limparCampos() {
-        campoId.setText(""); campoLogin.setText("");
-        campoSenha.setText("");
-        comboPerfil.setSelectedIndex(0);
-        campoLogin.requestFocus();
-    }
-
-    private Usuario.Perfil perfilSelecionado() {
-        return "FUNCIONÁRIO".equals(comboPerfil.getSelectedItem())
-                ? Usuario.Perfil.FUNCIONARIO
-                : Usuario.Perfil.ADMIN;
+        campoId.setText("");
+        campoNome.setText("");
+        campoNacionalidade.setText("");
+        campoNome.requestFocus();
     }
 
     private JButton criarBotao(String texto, Color cor) {
@@ -258,10 +242,12 @@ public class CadastroUsuarioFrame extends JInternalFrame implements IdiomaListen
     }
 
     private void configurarJanela() {
-        setTitle(Mensagens.get("menu.usuarios"));
-        setSize(560, 460);
-        setClosable(true); setMaximizable(true);
-        setIconifiable(true); setResizable(true);
-        setLocation(150, 60);
+        setTitle(Mensagens.get("menu.autores"));
+        setSize(550, 420);
+        setClosable(true);
+        setMaximizable(true);
+        setIconifiable(true);
+        setResizable(true);
+        setLocation(30, 30);
     }
 }

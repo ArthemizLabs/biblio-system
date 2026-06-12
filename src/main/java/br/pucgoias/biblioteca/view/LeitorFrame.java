@@ -15,7 +15,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListener {
+public class LeitorFrame extends JInternalFrame implements IdiomaListener {
 
     private final LeitorController controller = new LeitorController();
 
@@ -29,13 +29,13 @@ public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListene
     private JTabbedPane abas;
     private JLabel labelCodigo, labelNome, labelCpf, labelEmail, labelTelefone, labelPesquisarPor;
 
-    public CadastroLeitorFrame() {
+    public LeitorFrame() {
         inicializarComponentes();
         configurarJanela();
         Mensagens.addIdiomaListener(this);
         addInternalFrameListener(new InternalFrameAdapter() {
             @Override public void internalFrameClosed(InternalFrameEvent e) {
-                Mensagens.removeIdiomaListener(CadastroLeitorFrame.this);
+                Mensagens.removeIdiomaListener(LeitorFrame.this);
             }
         });
     }
@@ -192,13 +192,13 @@ public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListene
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void alterar() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -210,13 +210,13 @@ public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListene
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             limparCampos(); pesquisar();
         } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
     private void excluir() {
         if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
@@ -226,7 +226,7 @@ public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListene
                 JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
                 limparCampos(); pesquisar();
             } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -245,7 +245,7 @@ public class CadastroLeitorFrame extends JInternalFrame implements IdiomaListene
                     lista = leitor != null ? List.of(leitor) : List.of();
                 } catch (NumberFormatException e) {
                     JOptionPane.showMessageDialog(this, "Informe um código numérico válido.",
-                            "Aviso", JOptionPane.WARNING_MESSAGE);
+                            Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
                     return;
                 }
             }
