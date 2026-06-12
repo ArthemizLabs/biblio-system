@@ -1,8 +1,5 @@
 # BiblioSystem — Sistema de Gerenciamento de Biblioteca
 
-> **Disciplina:** CMP1611 – Programação Orientada a Objetos com Banco de Dados  
-> **Instituição:** Pontifícia Universidade Católica de Goiás (PUC Goiás)  
-> **Autor:** Arthur Mamedes Borges
 > **Tecnologias:** Java SE 17 · Swing · MySQL 8 · JDBC · Maven
 
 ---
@@ -29,6 +26,7 @@ Antes de importar e executar o projeto, certifique-se de ter instalado:
 > **Dica:** O Eclipse já vem com o Maven embutido (M2E). Não é necessário instalar o Maven separadamente para importar o projeto.
 >
 > **Dica Docker:** Se preferir não instalar o MySQL localmente, use o Docker — um único comando sobe o banco já configurado.
+
 ---
 
 ## Configuração do Banco de Dados
@@ -112,10 +110,10 @@ Há **duas formas** de importar. Escolha a que preferir:
 
 ---
 
-### Opção A — Importar pelo arquivo ZIP (formato da entrega)
+### Opção A — Importar como arquivo ZIP
 
-1. **Descompacte** o arquivo `CMP1611-MATRICULA-NOME.zip` em uma pasta de sua escolha.  
-   Dentro dele há a pasta `OPROJETO/`, que contém o projeto Maven (com o arquivo `pom.xml` na raiz).
+1. **Descompacte** o arquivo `[projeto].zip` em uma pasta de sua escolha.  
+   Dentro dele há a pasta `OPROJETO/`, que contém o projeto Maven (com o arquivo `pom.xml` na raiz + o `docker-compose.yml`).
 
 2. Abra o **Eclipse**.
 
