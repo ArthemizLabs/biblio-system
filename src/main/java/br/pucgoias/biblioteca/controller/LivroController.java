@@ -1,5 +1,6 @@
 package br.pucgoias.biblioteca.controller;
 
+import br.pucgoias.biblioteca.controller.interfaces.ICrudController;
 import br.pucgoias.biblioteca.dao.LivroDAO;
 import br.pucgoias.biblioteca.model.Livro;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
@@ -10,7 +11,7 @@ import java.util.List;
  * Controller da entidade Livro.
  * Valida ISBN, campos obrigatórios e duplicidade antes de acionar o DAO.
  */
-public class LivroController {
+public class LivroController implements ICrudController<Livro> {
 
     private final LivroDAO dao = new LivroDAO();
 

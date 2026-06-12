@@ -1,5 +1,6 @@
 package br.pucgoias.biblioteca.controller;
 
+import br.pucgoias.biblioteca.controller.interfaces.ICrudController;
 import br.pucgoias.biblioteca.dao.CategoriaDAO;
 import br.pucgoias.biblioteca.model.Categoria;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
@@ -10,7 +11,7 @@ import java.util.List;
  * Controller da entidade Categoria.
  * Contém as regras de negócio e validações antes de acionar o DAO.
  */
-public class CategoriaController {
+public class CategoriaController implements ICrudController<Categoria> {
 
     private final CategoriaDAO dao = new CategoriaDAO();
 
