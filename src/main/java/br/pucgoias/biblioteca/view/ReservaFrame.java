@@ -4,7 +4,7 @@ import br.pucgoias.biblioteca.dao.ReservaDAO;
 import br.pucgoias.biblioteca.controller.LeitorController;
 import br.pucgoias.biblioteca.controller.LivroController;
 import br.pucgoias.biblioteca.model.*;
-import br.pucgoias.biblioteca.dao.interfaces.IdiomaListener;
+import br.pucgoias.biblioteca.view.interfaces.IdiomaListener;
 import br.pucgoias.biblioteca.util.Mensagens;
 import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
 
