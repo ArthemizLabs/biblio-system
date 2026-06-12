@@ -14,6 +14,8 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
@@ -32,6 +34,7 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
     private JTabbedPane abas;
     private JLabel labelLeitor, labelLivro, labelDevolucao;
     private JButton btnRegistrarEmprestimo, btnDevolver, btnAtualizarLista;
+    private LocalDate devolucaoPrevistaPadrao = LocalDate.now().plusDays(14);
 
     public EmprestimoFrame() {
         inicializarComponentes();
@@ -79,8 +82,8 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
         labelDevolucao = new JLabel(Mensagens.get("label.devolucao"));
         painel.add(labelDevolucao, gbc);
         campoDevolucaoPrevista = new JTextField(12);
-        campoDevolucaoPrevista.setToolTipText("Formato: AAAA-MM-DD");
-        campoDevolucaoPrevista.setText(LocalDate.now().plusDays(14).toString());
+        campoDevolucaoPrevista.setToolTipText(Mensagens.get("label.data.formato"));
+        campoDevolucaoPrevista.setText(formatarData(devolucaoPrevistaPadrao));
         gbc.gridx = 1; painel.add(campoDevolucaoPrevista, gbc);
 
         btnRegistrarEmprestimo = criarBotao(Mensagens.get("btn.registrar.emprestimo"), new Color(39, 174, 96));
@@ -136,6 +139,8 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
         btnRegistrarEmprestimo.setText(Mensagens.get("btn.registrar.emprestimo"));
         btnDevolver.setText(Mensagens.get("btn.registrar.devolucao"));
         btnAtualizarLista.setText(Mensagens.get("btn.atualizar"));
+        campoDevolucaoPrevista.setToolTipText(Mensagens.get("label.data.formato"));
+        atualizarCampoDataParaIdiomaAtual();
         modeloTabela.setColumnIdentifiers(new String[]{
             "ID", Mensagens.get("col.leitor"), Mensagens.get("col.livro"),
             Mensagens.get("col.data.emprestimo"), Mensagens.get("col.devolucao.prevista"),
@@ -152,9 +157,10 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
             return;
         }
 
+        LocalDate dataDevolucaoPrevista;
         try {
-            LocalDate.parse(campoDevolucaoPrevista.getText().trim());
-        } catch (Exception e) {
+            dataDevolucaoPrevista = parseData(campoDevolucaoPrevista.getText().trim());
+        } catch (DateTimeParseException e) {
             JOptionPane.showMessageDialog(this,  Mensagens.get("msg.erro.data"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
@@ -164,11 +170,12 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
             emp.setLeitor(leitor);
             emp.setLivro(livro);
             emp.setDataEmprestimo(LocalDate.now());
-            emp.setDataDevolucaoPrevista(LocalDate.parse(campoDevolucaoPrevista.getText().trim()));
+            emp.setDataDevolucaoPrevista(dataDevolucaoPrevista);
             emp.setStatus(Emprestimo.Status.ATIVO);
             dao.inserir(emp);
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
-            campoDevolucaoPrevista.setText(LocalDate.now().plusDays(14).toString());
+            devolucaoPrevistaPadrao = LocalDate.now().plusDays(14);
+            campoDevolucaoPrevista.setText(formatarData(devolucaoPrevistaPadrao));
             listarAtivos();
         } catch (BancoDadosException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
@@ -234,6 +241,45 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
         btn.setFocusPainted(false);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         return btn;
+    }
+
+    private DateTimeFormatter formatadorDataAtual() {
+        return DateTimeFormatter.ofPattern(Mensagens.get("date.pattern"));
+    }
+
+    private String formatarData(LocalDate data) {
+        return data.format(formatadorDataAtual());
+    }
+
+    private LocalDate parseData(String texto) {
+        return LocalDate.parse(texto, formatadorDataAtual());
+    }
+
+    private void atualizarCampoDataParaIdiomaAtual() {
+        String textoAtual = campoDevolucaoPrevista.getText().trim();
+        LocalDate data = tentarParseDataFlexivel(textoAtual);
+        if (data != null) {
+            devolucaoPrevistaPadrao = data;
+            campoDevolucaoPrevista.setText(formatarData(data));
+        }
+    }
+
+    private LocalDate tentarParseDataFlexivel(String texto) {
+        if (texto.isEmpty()) return null;
+        try {
+            return parseData(texto);
+        } catch (DateTimeParseException ignored) {}
+        try {
+            return LocalDate.parse(texto, DateTimeFormatter.ofPattern("dd-MM-uuuu"));
+        } catch (DateTimeParseException ignored) {}
+        try {
+            return LocalDate.parse(texto, DateTimeFormatter.ofPattern("MM-dd-uuuu"));
+        } catch (DateTimeParseException ignored) {}
+        try {
+            return LocalDate.parse(texto);
+        } catch (DateTimeParseException ignored) {
+            return null;
+        }
     }
 
     private void configurarJanela() {
