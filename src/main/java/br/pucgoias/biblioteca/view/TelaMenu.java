@@ -79,10 +79,10 @@ public class TelaMenu extends JFrame implements IdiomaListener {
 
         labelSecaoAcervo = criarSecaoLabel(Mensagens.get("secao.acervo"));
         sidebar.add(labelSecaoAcervo);
-        btnLivros     = criarBotaoSidebar(Mensagens.get("menu.livros"),      () -> abrirJanela(new CadastroLivroFrame()));
-        btnAutores    = criarBotaoSidebar(Mensagens.get("menu.autores"),     () -> abrirJanela(new CadastroAutorFrame()));
-        btnEditoras   = criarBotaoSidebar(Mensagens.get("menu.editoras"),    () -> abrirJanela(new CadastroEditoraFrame()));
-        btnCategorias = criarBotaoSidebar(Mensagens.get("menu.categorias"),  () -> abrirJanela(new CadastroCategoriaFrame()));
+        btnLivros     = criarBotaoSidebar(Mensagens.get("menu.livros"),      () -> abrirJanela(new LivroFrame()));
+        btnAutores    = criarBotaoSidebar(Mensagens.get("menu.autores"),     () -> abrirJanela(new AutorFrame()));
+        btnEditoras   = criarBotaoSidebar(Mensagens.get("menu.editoras"),    () -> abrirJanela(new EditoraFrame()));
+        btnCategorias = criarBotaoSidebar(Mensagens.get("menu.categorias"),  () -> abrirJanela(new CategoriaFrame()));
         sidebar.add(btnLivros);
         sidebar.add(btnAutores);
         sidebar.add(btnEditoras);
@@ -92,7 +92,7 @@ public class TelaMenu extends JFrame implements IdiomaListener {
 
         labelSecaoUsuarios = criarSecaoLabel(Mensagens.get("secao.usuarios"));
         sidebar.add(labelSecaoUsuarios);
-        btnLeitores = criarBotaoSidebar(Mensagens.get("menu.leitores"), () -> abrirJanela(new CadastroLeitorFrame()));
+        btnLeitores = criarBotaoSidebar(Mensagens.get("menu.leitores"), () -> abrirJanela(new LeitorFrame()));
         sidebar.add(btnLeitores);
 
         sidebar.add(criarSeparador());
@@ -112,7 +112,7 @@ public class TelaMenu extends JFrame implements IdiomaListener {
         sidebar.add(labelSecaoSistema);
 
         if (usuarioLogado.getPerfil() == Usuario.Perfil.ADMIN) {
-            btnUsuarios = criarBotaoSidebar(Mensagens.get("menu.usuarios"), () -> abrirJanela(new CadastroUsuarioFrame()));
+            btnUsuarios = criarBotaoSidebar(Mensagens.get("menu.usuarios"), () -> abrirJanela(new UsuarioFrame()));
             sidebar.add(btnUsuarios);
         }
         btnIdioma = criarBotaoSidebar(Mensagens.get("menu.idioma"), () -> new ConfiguracaoIdiomaDialog(this).setVisible(true));

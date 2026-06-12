@@ -148,14 +148,14 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
         Livro livro   = (Livro)  comboLivro.getSelectedItem();
 
         if (leitor == null || livro == null) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             LocalDate.parse(campoDevolucaoPrevista.getText().trim());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Data inválida. Use o formato AAAA-MM-DD.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,  Mensagens.get("msg.erro.data"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -171,14 +171,14 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
             campoDevolucaoPrevista.setText(LocalDate.now().plusDays(14).toString());
             listarAtivos();
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void registrarDevolucao() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         int id = (int) modeloTabela.getValueAt(linha, 0);
@@ -191,7 +191,7 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             listarAtivos();
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -210,7 +210,7 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
                 });
             }
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -221,8 +221,8 @@ public class EmprestimoFrame extends JInternalFrame implements IdiomaListener {
             comboLivro.removeAllItems();
             livroCtrl.listarTodos().forEach(comboLivro::addItem);
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.dados ") + e.getMessage(),
+                    Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 

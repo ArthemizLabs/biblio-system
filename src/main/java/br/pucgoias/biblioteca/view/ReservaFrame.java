@@ -136,14 +136,14 @@ public class ReservaFrame extends JInternalFrame implements IdiomaListener {
         Livro livro   = (Livro)  comboLivro.getSelectedItem();
 
         if (leitor == null || livro == null) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
             if (!dao.verificarDisponibilidade(livro.getId())) {
                 JOptionPane.showMessageDialog(this,
                         "Livro indisponível para reserva (sem exemplares ou já reservado).",
-                        "Aviso", JOptionPane.WARNING_MESSAGE);
+                        Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
                 return;
             }
             Reserva reserva = new Reserva();
@@ -155,14 +155,14 @@ public class ReservaFrame extends JInternalFrame implements IdiomaListener {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
             listarReservas();
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void cancelarReserva() {
         int linha = tabela.getSelectedRow();
         if (linha < 0) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), Mensagens.get("label.aviso.title"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         int id = (int) modeloTabela.getValueAt(linha, 0);
@@ -174,7 +174,7 @@ public class ReservaFrame extends JInternalFrame implements IdiomaListener {
             JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
             listarReservas();
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -192,7 +192,7 @@ public class ReservaFrame extends JInternalFrame implements IdiomaListener {
                 });
             }
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -203,8 +203,8 @@ public class ReservaFrame extends JInternalFrame implements IdiomaListener {
             comboLivro.removeAllItems();
             livroCtrl.listarTodos().forEach(comboLivro::addItem);
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(),
-                    "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.dados ") + e.getMessage(),
+                    Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 

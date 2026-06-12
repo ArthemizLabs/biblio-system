@@ -148,7 +148,7 @@ public class TelaLogin extends JFrame {
         } catch (BancoDadosException e) {
             JOptionPane.showMessageDialog(this,
                     "Erro ao conectar ao banco de dados.\n" + e.getMessage(),
-                    "Erro",
+                    Mensagens.get("label.erro.title"),
                     JOptionPane.ERROR_MESSAGE);
         }
     }

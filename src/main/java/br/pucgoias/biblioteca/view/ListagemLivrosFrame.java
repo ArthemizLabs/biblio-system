@@ -135,7 +135,7 @@ public class ListagemLivrosFrame extends JFrame implements IdiomaListener {
             }
             labelTotal.setText(Mensagens.get("col.total") + " " + lista.size());
         } catch (BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, e.getMessage(), Mensagens.get("label.erro.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 
