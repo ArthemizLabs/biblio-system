@@ -3,49 +3,31 @@ package br.pucgoias.biblioteca.view;
 import br.pucgoias.biblioteca.controller.CategoriaController;
 import br.pucgoias.biblioteca.model.Categoria;
 import br.pucgoias.biblioteca.util.Mensagens;
-import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
-import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
 
-public class CadastroCategoriaFrame extends GenericFrame {
-
-    private final CategoriaController controller = new CategoriaController();
+public class CadastroCategoriaFrame extends GenericFrame<Categoria> {
 
     private JTextField campoNome;
     private JTextArea campoDescricao;
-    private JLabel labelCodigo, labelNome, labelDescricao, labelPesquisaNome;
+    private JLabel labelNome, labelDescricao;
 
     public CadastroCategoriaFrame() {
+        super(new CategoriaController());
         configurarJanela(Mensagens.get("menu.categorias"), 550, 450, 90, 90);
     }
 
     @Override
-    protected JPanel criarPainelCadastro() {
-        JPanel painel = new JPanel(new GridBagLayout());
-        painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0;
-        labelCodigo = new JLabel(Mensagens.get("label.codigo"));
-        painel.add(labelCodigo, gbc);
-        campoId = new JTextField(8);
-        campoId.setEditable(false);
-        campoId.setBackground(new Color(230, 230, 230));
-        gbc.gridx = 1; painel.add(campoId, gbc);
-
+    protected int adicionarCamposEspecificos(JPanel painel, GridBagConstraints gbc) {
         gbc.gridx = 0; gbc.gridy = 1;
         labelNome = new JLabel(Mensagens.get("label.nome"));
         painel.add(labelNome, gbc);
         campoNome = new JTextField(25);
         gbc.gridx = 1; painel.add(campoNome, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; gbc.gridy = 1 + 1;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         labelDescricao = new JLabel(Mensagens.get("label.descricao"));
         painel.add(labelDescricao, gbc);
@@ -55,148 +37,52 @@ public class CadastroCategoriaFrame extends GenericFrame {
         campoDescricao.setWrapStyleWord(true);
         gbc.gridx = 1; painel.add(new JScrollPane(campoDescricao), gbc);
 
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
-        JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
-        JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
-        painelBotoes.add(btnSalvar);
-        painelBotoes.add(btnAlterar);
-        painelBotoes.add(btnExcluir);
-        painelBotoes.add(btnLimpar);
-
-        gbc.gridx = 0; gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        gbc.insets = new Insets(20, 6, 6, 6);
-        painel.add(painelBotoes, gbc);
-
-        btnSalvar.addActionListener(e  -> salvar());
-        btnAlterar.addActionListener(e -> alterar());
-        btnExcluir.addActionListener(e -> excluir());
-        btnLimpar.addActionListener(e  -> limparCampos());
-
-        return painel;
+        return 1 + 2;
     }
 
     @Override
-    protected JPanel criarPainelPesquisa() {
-        JPanel painel = new JPanel(new BorderLayout(10, 10));
-        painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    protected Categoria construirEntidade(int id) {
+        return new Categoria(id, campoNome.getText(), campoDescricao.getText());
+    }
 
-        JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        labelPesquisaNome = new JLabel(Mensagens.get("label.nome"));
-        painelBusca.add(labelPesquisaNome);
-        campoPesquisa = new JTextField(20);
-        JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
-        painelBusca.add(campoPesquisa);
-        painelBusca.add(btnPesquisar);
+    @Override
+    protected List<Categoria> executarBusca() {
+        return controller.listarTodos();
+    }
 
-        modeloTabela = new DefaultTableModel(
-                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.descricao")}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        tabela = new JTable(modeloTabela);
-        tabela.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tabela.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tabela.setRowHeight(24);
-        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabela.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) carregarDaTabela();
-        });
+    @Override
+    protected Object[] linhaParaTabela(Categoria c) {
+        return new Object[]{c.getId(), c.getNome(), c.getDescricao()};
+    }
 
-        painel.add(painelBusca, BorderLayout.NORTH);
-        painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
+    @Override
+    protected void preencherCampos(int linha) {
+        campoNome.setText(modeloTabela.getValueAt(linha, 1).toString());
+        Object desc = modeloTabela.getValueAt(linha, 2);
+        campoDescricao.setText(desc != null ? desc.toString() : "");
+    }
 
-        btnPesquisar.addActionListener(e -> pesquisar());
-        campoPesquisa.addActionListener(e -> pesquisar());
+    @Override
+    protected void limparCamposEspecificos() {
+        campoNome.setText("");
+        campoDescricao.setText("");
+        campoNome.requestFocus();
+    }
 
-        return painel;
+    @Override
+    protected String[] chavesColunasTabela() {
+        return new String[]{"col.codigo", "col.nome", "col.descricao"};
+    }
+
+    @Override
+    protected String chaveLabelPesquisa() {
+        return "label.nome";
     }
 
     @Override
     protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.categorias"));
-        labelCodigo.setText(Mensagens.get("label.codigo"));
         labelNome.setText(Mensagens.get("label.nome"));
         labelDescricao.setText(Mensagens.get("label.descricao"));
-        labelPesquisaNome.setText(Mensagens.get("label.nome"));
-        modeloTabela.setColumnIdentifiers(new String[]{
-            Mensagens.get("col.codigo"), Mensagens.get("col.nome"), Mensagens.get("col.descricao")
-        });
-    }
-
-    @Override
-    protected void salvar() {
-        try {
-            controller.salvar(new Categoria(0, campoNome.getText(), campoDescricao.getText()));
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
-            limparCampos(); pesquisar();
-        } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    @Override
-    protected void alterar() {
-        if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            controller.atualizar(new Categoria(Integer.parseInt(campoId.getText()), campoNome.getText(), campoDescricao.getText()));
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
-            limparCampos(); pesquisar();
-        } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    @Override
-    protected void excluir() {
-        if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
-                "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            try {
-                controller.deletar(Integer.parseInt(campoId.getText()));
-                JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
-                limparCampos(); pesquisar();
-            } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    @Override
-    protected void pesquisar() {
-        List<Categoria> lista = controller.listarTodos();
-        modeloTabela.setRowCount(0);
-        if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
-            return;
-        }
-        for (Categoria c : lista) {
-            modeloTabela.addRow(new Object[]{c.getId(), c.getNome(), c.getDescricao()});
-        }
-    }
-
-    @Override
-    protected void carregarDaTabela() {
-        int linha = tabela.getSelectedRow();
-        if (linha < 0) return;
-        campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
-        campoNome.setText(modeloTabela.getValueAt(linha, 1).toString());
-        Object desc = modeloTabela.getValueAt(linha, 2);
-        campoDescricao.setText(desc != null ? desc.toString() : "");
-        abas.setSelectedIndex(0);
-    }
-
-    @Override
-    protected void limparCampos() {
-        campoId.setText(""); campoNome.setText(""); campoDescricao.setText("");
-        campoNome.requestFocus();
     }
 }

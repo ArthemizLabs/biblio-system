@@ -1,5 +1,6 @@
 package br.pucgoias.biblioteca.controller;
 
+import br.pucgoias.biblioteca.controller.interfaces.ICrudController;
 import br.pucgoias.biblioteca.dao.UsuarioDAO;
 import br.pucgoias.biblioteca.model.Usuario;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
@@ -10,7 +11,7 @@ import java.util.List;
  * Controller da entidade Usuario.
  * Gerencia autenticação e cadastro de usuários do sistema.
  */
-public class UsuarioController {
+public class UsuarioController implements ICrudController<Usuario> {
 
     private final UsuarioDAO dao = new UsuarioDAO();
 

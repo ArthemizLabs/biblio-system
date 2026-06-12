@@ -1,5 +1,6 @@
 package br.pucgoias.biblioteca.controller;
 
+import br.pucgoias.biblioteca.controller.interfaces.ICrudController;
 import br.pucgoias.biblioteca.dao.EditoraDAO;
 import br.pucgoias.biblioteca.model.Editora;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
@@ -10,7 +11,7 @@ import java.util.List;
  * Controller da entidade Editora.
  * Contém as regras de negócio e validações antes de acionar o DAO.
  */
-public class EditoraController {
+public class EditoraController implements ICrudController<Editora> {
 
     private final EditoraDAO dao = new EditoraDAO();
 

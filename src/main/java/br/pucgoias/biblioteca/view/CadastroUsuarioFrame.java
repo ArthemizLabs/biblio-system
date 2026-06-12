@@ -3,214 +3,101 @@ package br.pucgoias.biblioteca.view;
 import br.pucgoias.biblioteca.controller.UsuarioController;
 import br.pucgoias.biblioteca.model.Usuario;
 import br.pucgoias.biblioteca.util.Mensagens;
-import br.pucgoias.biblioteca.util.exceptions.BancoDadosException;
-import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
 
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
-public class CadastroUsuarioFrame extends GenericFrame {
-
-    private final UsuarioController controller = new UsuarioController();
+public class CadastroUsuarioFrame extends GenericFrame<Usuario> {
 
     private JTextField campoLogin;
     private JPasswordField campoSenha;
     private JComboBox<String> comboPerfil;
-    private JLabel labelCodigo, labelLogin, labelSenha, labelPerfil, labelPesquisaLogin;
+    private JLabel labelLogin, labelSenha, labelPerfil;
 
     public CadastroUsuarioFrame() {
+        super(new UsuarioController());
         configurarJanela(Mensagens.get("menu.usuarios"), 560, 460, 150, 60);
     }
 
     @Override
-    protected JPanel criarPainelCadastro() {
-        JPanel painel = new JPanel(new GridBagLayout());
-        painel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(6, 6, 6, 6);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        gbc.gridx = 0; gbc.gridy = 0;
-        labelCodigo = new JLabel(Mensagens.get("label.codigo"));
-        painel.add(labelCodigo, gbc);
-        campoId = new JTextField(8);
-        campoId.setEditable(false);
-        campoId.setBackground(new Color(230, 230, 230));
-        gbc.gridx = 1; painel.add(campoId, gbc);
-
+    protected int adicionarCamposEspecificos(JPanel painel, GridBagConstraints gbc) {
         gbc.gridx = 0; gbc.gridy = 1;
         labelLogin = new JLabel(Mensagens.get("label.login"));
         painel.add(labelLogin, gbc);
         campoLogin = new JTextField(25);
         gbc.gridx = 1; painel.add(campoLogin, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0; gbc.gridy = 1 + 1;
         labelSenha = new JLabel(Mensagens.get("label.senha"));
         painel.add(labelSenha, gbc);
         campoSenha = new JPasswordField(25);
         gbc.gridx = 1; painel.add(campoSenha, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0; gbc.gridy = 1 + 2;
         labelPerfil = new JLabel(Mensagens.get("label.perfil"));
         painel.add(labelPerfil, gbc);
         comboPerfil = new JComboBox<>(new String[]{"ADMIN", "FUNCIONÁRIO"});
         comboPerfil.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         gbc.gridx = 1; painel.add(comboPerfil, gbc);
 
-        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton btnSalvar = criarBotao(Mensagens.get("btn.salvar"), new Color(39, 174, 96));
-        JButton btnAlterar = criarBotao(Mensagens.get("btn.alterar"), new Color(41, 128, 185));
-        JButton btnExcluir = criarBotao(Mensagens.get("btn.excluir"), new Color(192, 57, 43));
-        JButton btnLimpar  = criarBotao(Mensagens.get("btn.limpar"),  new Color(127, 140, 141));
-        painelBotoes.add(btnSalvar);
-        painelBotoes.add(btnAlterar);
-        painelBotoes.add(btnExcluir);
-        painelBotoes.add(btnLimpar);
-
-        gbc.gridx = 0; gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.insets = new Insets(20, 6, 6, 6);
-        painel.add(painelBotoes, gbc);
-
-        btnSalvar.addActionListener(e  -> salvar());
-        btnAlterar.addActionListener(e -> alterar());
-        btnExcluir.addActionListener(e -> excluir());
-        btnLimpar.addActionListener(e  -> limparCampos());
-
-        return painel;
+        return 1 + 3;
     }
 
     @Override
-    protected JPanel criarPainelPesquisa() {
-        JPanel painel = new JPanel(new BorderLayout(10, 10));
-        painel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+    protected Usuario construirEntidade(int id) {
+        return new Usuario(id, campoLogin.getText(), new String(campoSenha.getPassword()), perfilSelecionado());
+    }
 
-        JPanel painelBusca = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        labelPesquisaLogin = new JLabel(Mensagens.get("label.login"));
-        painelBusca.add(labelPesquisaLogin);
-        campoPesquisa = new JTextField(20);
-        JButton btnPesquisar = criarBotao(Mensagens.get("btn.pesquisar"), new Color(41, 128, 185));
-        painelBusca.add(campoPesquisa);
-        painelBusca.add(btnPesquisar);
+    @Override
+    protected List<Usuario> executarBusca() {
+        String filtro = campoPesquisa.getText().trim().toLowerCase();
+        List<Usuario> todos = controller.listarTodos();
+        if (filtro.isEmpty()) return todos;
+        List<Usuario> filtrados = new ArrayList<>();
+        for (Usuario u : todos) {
+            if (u.getLogin().toLowerCase().contains(filtro)) filtrados.add(u);
+        }
+        return filtrados;
+    }
 
-        modeloTabela = new DefaultTableModel(
-                new String[]{Mensagens.get("col.codigo"), Mensagens.get("col.login"), Mensagens.get("col.perfil")}, 0) {
-            @Override public boolean isCellEditable(int r, int c) { return false; }
-        };
-        tabela = new JTable(modeloTabela);
-        tabela.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        tabela.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        tabela.setRowHeight(24);
-        tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabela.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) carregarDaTabela();
-        });
+    @Override
+    protected Object[] linhaParaTabela(Usuario u) {
+        String display = u.getPerfil() == Usuario.Perfil.FUNCIONARIO ? "FUNCIONÁRIO" : u.getPerfil().name();
+        return new Object[]{u.getId(), u.getLogin(), display};
+    }
 
-        painel.add(painelBusca, BorderLayout.NORTH);
-        painel.add(new JScrollPane(tabela), BorderLayout.CENTER);
+    @Override
+    protected void preencherCampos(int linha) {
+        campoLogin.setText(modeloTabela.getValueAt(linha, 1).toString());
+        campoSenha.setText("");
+        comboPerfil.setSelectedItem(modeloTabela.getValueAt(linha, 2).toString());
+    }
 
-        btnPesquisar.addActionListener(e -> pesquisar());
-        campoPesquisa.addActionListener(e -> pesquisar());
+    @Override
+    protected void limparCamposEspecificos() {
+        campoLogin.setText(""); campoSenha.setText("");
+        comboPerfil.setSelectedIndex(0);
+        campoLogin.requestFocus();
+    }
 
-        return painel;
+    @Override
+    protected String[] chavesColunasTabela() {
+        return new String[]{"col.codigo", "col.login", "col.perfil"};
+    }
+
+    @Override
+    protected String chaveLabelPesquisa() {
+        return "label.login";
     }
 
     @Override
     protected void atualizarTextos() {
         setTitle(Mensagens.get("menu.usuarios"));
-        labelCodigo.setText(Mensagens.get("label.codigo"));
         labelLogin.setText(Mensagens.get("label.login"));
         labelSenha.setText(Mensagens.get("label.senha"));
         labelPerfil.setText(Mensagens.get("label.perfil"));
-        labelPesquisaLogin.setText(Mensagens.get("label.login"));
-        modeloTabela.setColumnIdentifiers(new String[]{
-            Mensagens.get("col.codigo"), Mensagens.get("col.login"), Mensagens.get("col.perfil")
-        });
-    }
-
-    @Override
-    protected void salvar() {
-        try {
-            controller.salvar(new Usuario(0, campoLogin.getText(), new String(campoSenha.getPassword()), perfilSelecionado()));
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.salvar"));
-            limparCampos(); pesquisar();
-        } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    @Override
-    protected void alterar() {
-        if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        try {
-            controller.atualizar(new Usuario(Integer.parseInt(campoId.getText()),
-                    campoLogin.getText(), new String(campoSenha.getPassword()), perfilSelecionado()));
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.alterar"));
-            limparCampos(); pesquisar();
-        } catch (ValidacaoException | BancoDadosException e) {
-            JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    @Override
-    protected void excluir() {
-        if (campoId.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.selecionar"), "Aviso", JOptionPane.WARNING_MESSAGE);
-            return;
-        }
-        if (JOptionPane.showConfirmDialog(this, Mensagens.get("msg.confirmar.excluir"),
-                "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-            try {
-                controller.deletar(Integer.parseInt(campoId.getText()));
-                JOptionPane.showMessageDialog(this, Mensagens.get("msg.sucesso.excluir"));
-                limparCampos(); pesquisar();
-            } catch (BancoDadosException e) {
-                JOptionPane.showMessageDialog(this, e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    @Override
-    protected void pesquisar() {
-        try {
-            List<Usuario> lista = controller.listarTodos();
-            modeloTabela.setRowCount(0);
-            String filtro = campoPesquisa.getText().trim().toLowerCase();
-            for (Usuario u : lista) {
-                if (filtro.isEmpty() || u.getLogin().toLowerCase().contains(filtro)) {
-                    String display = u.getPerfil() == Usuario.Perfil.FUNCIONARIO ? "FUNCIONÁRIO" : u.getPerfil().name();
-                    modeloTabela.addRow(new Object[]{u.getId(), u.getLogin(), display});
-                }
-            }
-            if (modeloTabela.getRowCount() == 0) {
-                JOptionPane.showMessageDialog(this, Mensagens.get("msg.erro.nao.encontrado"));
-            }
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao pesquisar: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    @Override
-    protected void carregarDaTabela() {
-        int linha = tabela.getSelectedRow();
-        if (linha < 0) return;
-        campoId.setText(modeloTabela.getValueAt(linha, 0).toString());
-        campoLogin.setText(modeloTabela.getValueAt(linha, 1).toString());
-        campoSenha.setText("");
-        comboPerfil.setSelectedItem(modeloTabela.getValueAt(linha, 2).toString());
-        abas.setSelectedIndex(0);
-    }
-
-    @Override
-    protected void limparCampos() {
-        campoId.setText(""); campoLogin.setText(""); campoSenha.setText("");
-        comboPerfil.setSelectedIndex(0);
-        campoLogin.requestFocus();
     }
 
     private Usuario.Perfil perfilSelecionado() {

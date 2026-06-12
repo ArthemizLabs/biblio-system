@@ -1,5 +1,6 @@
 package br.pucgoias.biblioteca.controller;
 
+import br.pucgoias.biblioteca.controller.interfaces.ICrudController;
 import br.pucgoias.biblioteca.dao.LeitorDAO;
 import br.pucgoias.biblioteca.model.Leitor;
 import br.pucgoias.biblioteca.util.exceptions.ValidacaoException;
@@ -10,7 +11,7 @@ import java.util.List;
  * Controller da entidade Leitor.
  * Valida CPF e campos obrigatórios antes de acionar o DAO.
  */
-public class LeitorController {
+public class LeitorController implements ICrudController<Leitor> {
 
     private final LeitorDAO dao = new LeitorDAO();
 
